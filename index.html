@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>广告收益游戏 - 真实收益专业版</title>
+    <title>广告收益游戏 - 修复SDK加载版</title>
     
-    <!-- Unity Ads SDK (必须) -->
-    <script src="https://cdn.unityads.unity3d.com/unity-ads-sdk.js"></script>
+    <!-- 不再使用预加载，改为动态加载 -->
     
     <style>
+        /* 样式保持不变（和之前一样） */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -439,6 +439,18 @@
         .glow {
             animation: glow 2s infinite;
         }
+        
+        /* 加载动画 */
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
     </style>
 </head>
 <body>
@@ -462,15 +474,15 @@
                 <span>💾</span> 导出
             </button>
             <div style="grid-column: span 2; font-size: 9px; color: #888; text-align: center; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-                模式: <span id="mode-text" style="color: #4CAF50; font-weight: bold;">检测中...</span>
+                模式: <span id="mode-text" style="color: #FF9800; font-weight: bold;">加载SDK<span class="loading-dots"></span></span>
             </div>
         </div>
     </div>
     
     <!-- 模式指示器 -->
     <div class="mode-indicator-column fade-in" id="mode-indicator">
-        <span id="mode-icon">🎮</span>
-        <span id="mode-label">检测中</span>
+        <span id="mode-icon">🔄</span>
+        <span id="mode-label">加载SDK<span class="loading-dots"></span></span>
     </div>
     
     <!-- 三列广告窗口 (3cm × 5cm) -->
@@ -479,14 +491,14 @@
             <div class="column-number">1</div>
             <div class="column-content">
                 <div class="ad-title">广告位 1</div>
-                <div class="ad-status-column ready" id="status1">
-                    🔍 初始化...
+                <div class="ad-status-column" id="status1">
+                    🔄 初始化中<span class="loading-dots"></span>
                 </div>
                 <div class="earnings-display-column">
                     收益: <span class="earnings-amount-column" id="earnings1">$0.00</span>
                 </div>
-                <button class="ad-btn-column" onclick="showAd(1)" id="btn1">
-                    🎬 观看广告
+                <button class="ad-btn-column" onclick="showAd(1)" id="btn1" disabled>
+                    ⏳ 加载中
                 </button>
             </div>
         </div>
@@ -495,14 +507,14 @@
             <div class="column-number">2</div>
             <div class="column-content">
                 <div class="ad-title">广告位 2</div>
-                <div class="ad-status-column ready" id="status2">
-                    🔍 初始化...
+                <div class="ad-status-column" id="status2">
+                    🔄 初始化中<span class="loading-dots"></span>
                 </div>
                 <div class="earnings-display-column">
                     收益: <span class="earnings-amount-column" id="earnings2">$0.00</span>
                 </div>
-                <button class="ad-btn-column" onclick="showAd(2)" id="btn2">
-                    🎬 观看广告
+                <button class="ad-btn-column" onclick="showAd(2)" id="btn2" disabled>
+                    ⏳ 加载中
                 </button>
             </div>
         </div>
@@ -511,14 +523,14 @@
             <div class="column-number">3</div>
             <div class="column-content">
                 <div class="ad-title">广告位 3</div>
-                <div class="ad-status-column ready" id="status3">
-                    🔍 初始化...
+                <div class="ad-status-column" id="status3">
+                    🔄 初始化中<span class="loading-dots"></span>
                 </div>
                 <div class="earnings-display-column">
                     收益: <span class="earnings-amount-column" id="earnings3">$0.00</span>
                 </div>
-                <button class="ad-btn-column" onclick="showAd(3)" id="btn3">
-                    🎬 观看广告
+                <button class="ad-btn-column" onclick="showAd(3)" id="btn3" disabled>
+                    ⏳ 加载中
                 </button>
             </div>
         </div>
@@ -575,7 +587,7 @@
                     <tbody id="dailyRecords">
                         <tr>
                             <td colspan="6" style="color:#aaa;text-align:center;padding:20px;">
-                                暂无收益记录，点击广告开始赚钱！
+                                系统初始化中<span class="loading-dots"></span>
                             </td>
                         </tr>
                     </tbody>
@@ -590,7 +602,7 @@
             // Unity真实配置 - 你的Game ID和广告单元
             unityGameId: '6028834',
             unityAdUnits: {
-                rewarded1: 'youmeng1',  // 必须和Unity后台一致
+                rewarded1: 'youmeng1',
                 rewarded2: 'youmeng2',
                 rewarded3: 'youmeng3'
             },
@@ -599,97 +611,210 @@
             testMode: false,  // false = 真实收益，true = 测试模式
             
             // 游戏设置
-            adCooldown: 30,         // 冷却时间(秒)
-            baseEarnings: 0.35      // 基础预估收益(美元)
+            adCooldown: 30,
+            baseEarnings: 0.35,
+            
+            // SDK加载配置
+            sdkUrls: [
+                'https://cdn.unityads.unity3d.com/unity-ads-sdk.js',
+                'https://unity3d.com/ads/web/sdk/unity-ads-sdk.js',
+                'https://webgl.unityads.unity3d.com/unity-ads-sdk.js'
+            ]
         };
         
         // ========== 游戏数据 ==========
         let gameData = {
-            // 基础统计
             impressions: 0,
             clicks: 0,
             todayEarnings: 0,
             totalEarnings: 0,
-            realEarnings: 0,        // 真实收益累计
+            realEarnings: 0,
             
-            // 广告位数据
             adCooldowns: [0, 0, 0],
             adEarnings: [0, 0, 0],
             adCounts: [0, 0, 0],
             
-            // 日收益记录
             dailyRecords: [],
             
-            // Unity状态
             unityAvailable: false,
             unityInitialized: false,
             
-            // 元数据
             todayDate: new Date().toLocaleDateString('zh-CN'),
             startDate: new Date().toISOString().split('T')[0],
             
-            // 版本
-            version: '2.0'
+            version: '2.1'
         };
         
-        // ========== Unity真实广告系统 ==========
-        class RealUnityAdSystem {
+        // ========== 智能Unity加载系统 ==========
+        class SmartUnityLoader {
             constructor() {
-                this.isRealMode = true; // 强制真实模式
-                this.initializeUnity();
+                this.sdkLoaded = false;
+                this.retryCount = 0;
+                this.maxRetries = 3;
+                this.init();
             }
             
-            initializeUnity() {
-                console.log('🎮 Unity真实广告系统初始化...');
-                console.log('💰 Game ID:', CONFIG.unityGameId);
-                console.log('🎯 广告单元:', Object.values(CONFIG.unityAdUnits));
+            async init() {
+                console.log('🚀 智能Unity加载器启动...');
+                this.updateStatus('正在加载Unity SDK...');
                 
-                // 更新状态
-                this.updateStatus('正在初始化Unity...');
-                this.updateModeDisplay('🔧 初始化', '#FF9800');
-                
-                // 检查Unity SDK
-                if (typeof unityads === 'undefined') {
-                    console.error('❌ Unity SDK未加载！');
-                    this.showError('Unity SDK未加载，请刷新页面');
-                    return;
+                // 尝试多个CDN地址
+                for (let i = 0; i < CONFIG.sdkUrls.length; i++) {
+                    const url = CONFIG.sdkUrls[i];
+                    console.log(`📡 尝试CDN ${i + 1}: ${url}`);
+                    
+                    const success = await this.loadSDK(url);
+                    if (success) {
+                        this.sdkLoaded = true;
+                        await this.initializeUnity();
+                        return;
+                    }
                 }
                 
-                // 初始化Unity Ads - 必须是真实模式！
-                unityads.init(CONFIG.unityGameId, {
-                    testMode: CONFIG.testMode, // 使用配置中的testMode
-                    onInitialized: () => {
-                        console.log('🎉 Unity真实广告初始化成功！');
-                        console.log('💰 测试模式:', CONFIG.testMode ? '是(测试模式，无收益)' : '否(真实收益模式)');
+                // 所有CDN都失败
+                this.handleSDKLoadFailure();
+            }
+            
+            loadSDK(url) {
+                return new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = url;
+                    script.async = true;
+                    
+                    // 设置超时
+                    const timeout = setTimeout(() => {
+                        console.log(`⏰ CDN超时: ${url}`);
+                        resolve(false);
+                    }, 8000);
+                    
+                    script.onload = () => {
+                        clearTimeout(timeout);
+                        console.log(`✅ SDK加载成功: ${url}`);
                         
-                        gameData.unityAvailable = true;
-                        gameData.unityInitialized = true;
-                        
-                        if (CONFIG.testMode) {
-                            console.warn('⚠️ 警告：当前处于测试模式，不会产生真实收益！');
-                            this.updateModeDisplay('🧪 测试模式', '#FF9800');
-                            this.showNotification('⚠️ 当前为测试模式，不会产生真实收益！', '#FF9800');
+                        if (typeof unityads !== 'undefined') {
+                            console.log('🎉 unityads对象已定义');
+                            resolve(true);
                         } else {
-                            console.log('💰 现在开始产生真实美元收益！');
-                            this.updateModeDisplay('💰 真实收益', '#4CAF50');
-                            this.showNotification('🎉 Unity真实收益模式已启用！', '#4CAF50');
+                            console.log('❌ unityads对象未定义');
+                            resolve(false);
                         }
-                        
-                        this.updateStatus('✅ 准备就绪');
-                        this.updateAdStatusAll('✅ 准备就绪');
-                    },
-                    onFailed: (error) => {
-                        console.error('❌ Unity初始化失败:', error);
-                        this.updateModeDisplay('❌ 连接失败', '#f44336');
-                        this.updateStatus('❌ Unity连接失败');
-                        this.showError('Unity连接失败: ' + error);
-                    }
+                    };
+                    
+                    script.onerror = (error) => {
+                        clearTimeout(timeout);
+                        console.log(`❌ SDK加载失败: ${url}`, error);
+                        resolve(false);
+                    };
+                    
+                    // 添加crossorigin属性避免CORS问题
+                    script.crossOrigin = 'anonymous';
+                    document.head.appendChild(script);
                 });
+            }
+            
+            async initializeUnity() {
+                console.log('🔗 初始化Unity Ads...');
+                this.updateStatus('正在初始化Unity...');
+                
+                try {
+                    unityads.init(CONFIG.unityGameId, {
+                        testMode: CONFIG.testMode,
+                        onInitialized: () => {
+                            console.log('🎉 Unity初始化成功！');
+                            console.log('💰 测试模式:', CONFIG.testMode ? '是(测试)' : '否(真实收益)');
+                            
+                            gameData.unityAvailable = true;
+                            gameData.unityInitialized = true;
+                            
+                            if (CONFIG.testMode) {
+                                this.updateModeDisplay('🧪 测试模式', '#FF9800');
+                                this.showNotification('⚠️ 当前为测试模式，不会产生真实收益！', '#FF9800');
+                            } else {
+                                this.updateModeDisplay('💰 真实收益', '#4CAF50');
+                                this.showNotification('🎉 Unity真实收益模式已启用！', '#4CAF50');
+                            }
+                            
+                            this.updateAdStatusAll('✅ 准备就绪');
+                            this.enableAdButtons();
+                            
+                            console.log('✅ 真实收益系统就绪');
+                        },
+                        onFailed: (error) => {
+                            console.error('❌ Unity初始化失败:', error);
+                            this.updateModeDisplay('❌ 初始化失败', '#f44336');
+                            this.updateStatus('Unity初始化失败');
+                            this.showError('Unity初始化失败: ' + error);
+                        }
+                    });
+                } catch (error) {
+                    console.error('❌ Unity初始化异常:', error);
+                    this.updateModeDisplay('❌ 系统错误', '#f44336');
+                    this.showError('系统错误: ' + error);
+                }
+            }
+            
+            handleSDKLoadFailure() {
+                console.error('❌ 所有Unity CDN加载失败');
+                this.updateModeDisplay('🎬 离线模式', '#FF9800');
+                this.updateStatus('离线模式（SDK加载失败）');
+                this.updateAdStatusAll('🎬 离线模式就绪');
+                this.enableAdButtons();
+                
+                this.showNotification(
+                    'Unity SDK加载失败，使用离线模式<br>真实收益需要SDK连接',
+                    '#FF9800'
+                );
+            }
+            
+            updateModeDisplay(label, color) {
+                const iconMap = {
+                    '#4CAF50': '💰',
+                    '#FF9800': '🎬',
+                    '#f44336': '❌',
+                    '#2196F3': '🔄'
+                };
+                
+                const icon = iconMap[color] || '🎮';
+                document.getElementById('mode-icon').textContent = icon;
+                document.getElementById('mode-label').innerHTML = label;
+                document.getElementById('mode-indicator').style.background = color;
+                document.getElementById('mode-text').textContent = label;
+                document.getElementById('mode-text').style.color = color;
+                
+                if (color === '#4CAF50') {
+                    document.getElementById('mode-indicator').classList.add('glow');
+                } else {
+                    document.getElementById('mode-indicator').classList.remove('glow');
+                }
+            }
+            
+            updateStatus(message) {
+                console.log('📱 状态:', message);
+            }
+            
+            updateAdStatusAll(message) {
+                for (let i = 1; i <= 3; i++) {
+                    const statusEl = document.getElementById(`status${i}`);
+                    if (statusEl) {
+                        statusEl.innerHTML = message;
+                        statusEl.className = 'ad-status-column ready';
+                    }
+                }
+            }
+            
+            enableAdButtons() {
+                for (let i = 1; i <= 3; i++) {
+                    const btn = document.getElementById(`btn${i}`);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '🎬 观看广告';
+                    }
+                }
             }
             
             async showAd(adSlotId) {
                 if (!gameData.unityInitialized) {
-                    this.showError('Unity未初始化，请刷新页面');
+                    this.showError('Unity未初始化，请等待或刷新页面');
                     return { success: false, message: 'Unity未初始化' };
                 }
                 
@@ -699,7 +824,7 @@
                     return { success: false, message: `冷却中，请等待 ${gameData.adCooldowns[adId]} 秒` };
                 }
                 
-                console.log(`🎬 展示真实Unity广告 ${adSlotId}`);
+                console.log(`🎬 展示广告 ${adSlotId}`);
                 
                 try {
                     const adUnitId = CONFIG.unityAdUnits[`rewarded${adSlotId}`];
@@ -708,17 +833,16 @@
                         unityads.show(adUnitId, {
                             onClosed: (adResult) => {
                                 if (adResult && adResult.completed) {
-                                    console.log('✅ 用户完成观看真实广告');
-                                    console.log('💰 收益已计入Unity后台账户');
+                                    console.log('✅ 用户完成观看广告');
+                                    console.log('💰 收益已计入Unity后台');
                                     
-                                    // 记录广告完成
                                     this.recordAdComplete(adSlotId, true);
                                     
                                     resolve({
                                         success: true,
                                         isRealAd: true,
                                         earnings: CONFIG.baseEarnings,
-                                        message: '真实广告完成！'
+                                        message: '广告完成！'
                                     });
                                 } else {
                                     resolve({
@@ -731,7 +855,7 @@
                                 console.error('❌ 广告展示失败:', error);
                                 resolve({
                                     success: false,
-                                    message: '广告加载失败: ' + error
+                                    message: '广告加载失败'
                                 });
                             }
                         });
@@ -743,7 +867,7 @@
                     console.error('❌ 广告异常:', error);
                     return {
                         success: false,
-                        message: '广告系统异常: ' + error
+                        message: '广告系统异常'
                     };
                 }
             }
@@ -752,7 +876,7 @@
                 const adId = adSlotId - 1;
                 const earnings = CONFIG.baseEarnings;
                 
-                // 更新统计数据
+                // 更新数据
                 gameData.impressions++;
                 gameData.clicks++;
                 gameData.todayEarnings += earnings;
@@ -773,7 +897,7 @@
                 updateCooldownDisplay();
                 updateDailyRecords();
                 
-                // 播放收益动画
+                // 动画效果
                 this.playCoinAnimation(adSlotId);
                 
                 // 更新状态
@@ -795,7 +919,6 @@
                     hour12: false 
                 });
                 
-                // 查找今天的记录组
                 let dateGroup = gameData.dailyRecords.find(group => group.date === dateStr);
                 
                 if (!dateGroup) {
@@ -804,13 +927,11 @@
                         totalEarnings: 0,
                         records: []
                     };
-                    gameData.dailyRecords.unshift(dateGroup); // 最新日期在前面
+                    gameData.dailyRecords.unshift(dateGroup);
                 }
                 
-                // 更新日总收益
                 dateGroup.totalEarnings += earnings;
                 
-                // 添加详细记录
                 dateGroup.records.unshift({
                     time: timeStr,
                     adSlot: adSlotId,
@@ -819,7 +940,6 @@
                     status: '完成'
                 });
                 
-                // 限制记录数量
                 if (dateGroup.records.length > 20) {
                     dateGroup.records = dateGroup.records.slice(0, 20);
                 }
@@ -842,42 +962,6 @@
                     earningsEl.textContent = '$' + gameData.adEarnings[adSlotId - 1].toFixed(2);
                     earningsEl.classList.add('coin-animation');
                     setTimeout(() => earningsEl.classList.remove('coin-animation'), 300);
-                }
-            }
-            
-            updateAdStatusAll(message) {
-                for (let i = 1; i <= 3; i++) {
-                    const statusEl = document.getElementById(`status${i}`);
-                    if (statusEl && statusEl.textContent.includes('初始化')) {
-                        statusEl.textContent = message;
-                        statusEl.className = 'ad-status-column ready';
-                    }
-                }
-            }
-            
-            updateStatus(message) {
-                console.log('📱 状态更新:', message);
-            }
-            
-            updateModeDisplay(label, color) {
-                const iconMap = {
-                    '#4CAF50': '💰',
-                    '#FF9800': '🔧',
-                    '#f44336': '❌',
-                    '#2196F3': '🎮'
-                };
-                
-                const icon = iconMap[color] || '🎮';
-                document.getElementById('mode-icon').textContent = icon;
-                document.getElementById('mode-label').textContent = label;
-                document.getElementById('mode-indicator').style.background = color;
-                document.getElementById('mode-text').textContent = label;
-                document.getElementById('mode-text').style.color = color;
-                
-                if (color === '#4CAF50') {
-                    document.getElementById('mode-indicator').classList.add('glow');
-                } else {
-                    document.getElementById('mode-indicator').classList.remove('glow');
                 }
             }
             
@@ -912,7 +996,7 @@
                     border-left: 4px solid rgba(255,255,255,0.3);
                 `;
                 
-                notification.textContent = message;
+                notification.innerHTML = message;
                 document.body.appendChild(notification);
                 
                 setTimeout(() => {
@@ -924,7 +1008,6 @@
                     }, 300);
                 }, 4000);
                 
-                // 添加动画样式
                 if (!document.getElementById('notif-anim')) {
                     const style = document.createElement('style');
                     style.id = 'notif-anim';
@@ -948,7 +1031,7 @@
         }
         
         // ========== 游戏逻辑 ==========
-        const adSystem = new RealUnityAdSystem();
+        const unityLoader = new SmartUnityLoader();
         
         // 冷却计时器
         setInterval(() => {
@@ -983,7 +1066,7 @@
                 statusEl.className = 'ad-status-column';
                 
                 console.log(`📡 请求广告位 ${adIndex}`);
-                const result = await adSystem.showAd(adIndex);
+                const result = await unityLoader.showAd(adIndex);
                 
                 if (result.success) {
                     if (result.isRealAd) {
@@ -1039,23 +1122,19 @@
         
         // 更新统计
         function updateStats() {
-            // 基础统计
             document.getElementById('impressions').textContent = gameData.impressions;
             document.getElementById('todayEarnings').textContent = '$' + gameData.todayEarnings.toFixed(2);
             document.getElementById('totalEarnings').textContent = '$' + gameData.totalEarnings.toFixed(2);
             
-            // 点击率
             const clickRate = gameData.impressions > 0 ? 
                 ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0;
             document.getElementById('clickRate').textContent = clickRate + '%';
             
-            // 各广告位收益
             for (let i = 0; i < 3; i++) {
                 const el = document.getElementById(`earnings${i + 1}`);
                 if (el) el.textContent = '$' + gameData.adEarnings[i].toFixed(2);
             }
             
-            // 更新当前日期
             document.getElementById('currentDate').textContent = gameData.todayDate;
             
             saveGameData();
@@ -1072,7 +1151,7 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" style="color:#aaa;text-align:center;padding:20px;">
-                            暂无收益记录，点击广告开始赚钱！
+                            暂无收益记录
                         </td>
                     </tr>
                 `;
@@ -1122,7 +1201,6 @@
                     const parsed = JSON.parse(saved);
                     const today = new Date().toLocaleDateString('zh-CN');
                     
-                    // 检查是否是今天的数据
                     if (parsed.todayDate !== today) {
                         parsed.todayEarnings = 0;
                         parsed.todayDate = today;
@@ -1150,7 +1228,24 @@
         // ========== 控制功能 ==========
         window.testUnityConnection = function() {
             if (typeof unityads === 'undefined') {
-                alert('❌ Unity SDK未加载\n请检查网络连接或刷新页面');
+                alert('❌ Unity SDK未加载\n系统正在尝试重新加载...');
+                
+                // 尝试重新加载
+                const script = document.createElement('script');
+                script.src = 'https://cdn.unityads.unity3d.com/unity-ads-sdk.js';
+                script.onload = () => {
+                    if (typeof unityads !== 'undefined') {
+                        alert('✅ SDK重新加载成功！\n请刷新页面初始化。');
+                        location.reload();
+                    } else {
+                        alert('❌ 重新加载失败\n请检查网络连接。');
+                    }
+                };
+                script.onerror = () => {
+                    alert('❌ 重新加载失败\n请检查网络连接。');
+                };
+                document.head.appendChild(script);
+                
                 return;
             }
             
@@ -1194,14 +1289,13 @@
                     unityInitialized: gameData.unityInitialized,
                     todayDate: today,
                     startDate: gameData.startDate,
-                    version: '2.0'
+                    version: '2.1'
                 };
                 
                 updateStats();
                 updateDailyRecords();
                 updateCooldownDisplay();
                 
-                // 重置UI
                 for (let i = 1; i <= 3; i++) {
                     document.getElementById(`earnings${i}`).textContent = '$0.00';
                     document.getElementById(`status${i}`).innerHTML = '✅ 准备就绪';
@@ -1249,26 +1343,7 @@
             // 自动保存定时器
             setInterval(saveGameData, 30000);
             
-            // 检查Unity状态
-            setTimeout(() => {
-                if (typeof unityads !== 'undefined' && unityads.gameId) {
-                    console.log('✅ Unity SDK状态: 已加载');
-                    console.log('🎮 Unity模式:', unityads.testMode ? '测试模式' : '真实收益模式');
-                    
-                    if (!unityads.testMode) {
-                        console.log('💰 真实收益模式已激活！');
-                        adSystem.updateModeDisplay('💰 真实收益', '#4CAF50');
-                    } else {
-                        console.warn('⚠️ 当前处于测试模式，不会产生真实收益！');
-                        adSystem.updateModeDisplay('🧪 测试模式', '#FF9800');
-                    }
-                } else {
-                    console.warn('⚠️ Unity SDK未正确加载');
-                    adSystem.updateModeDisplay('❌ SDK错误', '#f44336');
-                }
-            }, 2000);
-            
-            console.log('✅ 真实收益游戏就绪');
+            console.log('✅ 系统初始化完成');
         });
         
         // 自动保存
