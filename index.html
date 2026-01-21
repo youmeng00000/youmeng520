@@ -3,298 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>广告收益游戏 - 移动端优化版</title>
+    <title>广告收益游戏 - 移动紧凑版</title>
     
-    <!-- 移动端优化meta标签 -->
+    <!-- 移动端优化meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1a2e">
     
     <style>
-        /* 基础样式 */
+        /* 重置和基础 */
         * { 
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+            -webkit-tap-highlight-color: transparent;
         }
         
         html, body {
             width: 100%;
             height: 100%;
-            overflow-x: hidden;
-            font-size: 16px;
-            -webkit-text-size-adjust: 100%; /* 禁止字体自动调整 */
-            touch-action: manipulation; /* 优化触摸响应 */
-        }
-        
-        body { 
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            overflow: hidden;
             font-family: 'Arial', 'Microsoft YaHei', sans-serif;
-            padding: 15px;
-            min-height: 100vh;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
+            font-size: 14px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
         }
         
-        /* 移动端优先的布局 */
-        .mobile-container {
-            flex: 1;
+        /* 紧凑布局容器 */
+        .compact-container {
             width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
+            height: 100vh;
+            padding: 10px;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         
-        /* 移动端状态栏 */
-        .mobile-header {
+        /* 紧凑头部 */
+        .compact-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 5px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
-        .mobile-title {
-            font-size: 18px;
+        .game-title {
+            font-size: 16px;
             font-weight: bold;
-            color: #fff;
+            color: #4CAF50;
         }
         
-        .mobile-mode {
-            background: #FF9800;
+        .mode-badge {
+            background: linear-gradient(135deg, #FF9800, #FF5722);
             color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
             font-weight: bold;
         }
         
-        /* 移动端广告列（垂直排列） */
-        .mobile-columns {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex: 1;
+        /* 紧凑控制按钮行 */
+        .compact-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
         }
         
-        .mobile-ad-slot {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .control-btn {
+            background: rgba(33, 150, 243, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            min-height: 36px;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+        
+        .control-btn.test { background: rgba(255, 152, 0, 0.8); }
+        .control-btn.reset { background: rgba(244, 67, 54, 0.8); }
+        .control-btn.real { background: rgba(76, 175, 80, 0.8); }
+        .control-btn.help { background: rgba(156, 39, 176, 0.8); }
+        .control-btn.theme { background: rgba(0, 150, 136, 0.8); }
+        .control-btn.export { background: rgba(255, 87, 34, 0.8); }
+        
+        /* 紧凑广告位 */
+        .compact-ad-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+            flex: 1;
+            min-height: 0; /* 重要：防止溢出 */
+        }
+        
+        .ad-slot {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.1);
             min-height: 140px;
+            max-height: 160px;
         }
         
         .slot-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .slot-number {
+            width: 24px;
+            height: 24px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            width: 30px;
-            height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
         }
         
         .slot-title {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: bold;
-            color: #fff;
-        }
-        
-        .slot-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
         
         .slot-status {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 10px;
-            margin: 8px 0;
-            font-size: 13px;
-            text-align: center;
-            min-height: 50px;
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            min-height: 40px;
+            overflow: hidden;
+            word-break: break-word;
         }
         
         .slot-earnings {
-            font-size: 13px;
-            color: #ccc;
+            font-size: 11px;
+            color: #aaa;
             text-align: center;
-            margin: 5px 0;
+            margin: 3px 0;
         }
         
         .earnings-amount {
             color: #4CAF50;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
         }
         
-        /* 移动端优化按钮 */
-        .mobile-ad-btn {
+        .slot-btn {
             background: linear-gradient(135deg, #4CAF50, #2E7D32);
             color: white;
             border: none;
-            padding: 15px 0;
-            border-radius: 25px;
-            font-size: 16px;
+            padding: 8px 0;
+            border-radius: 15px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            min-height: 50px; /* 易于点击 */
-            touch-action: manipulation;
-            transition: all 0.2s;
+            margin-top: 5px;
+            min-height: 32px;
         }
         
-        .mobile-ad-btn:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-        
-        .mobile-ad-btn:disabled {
+        .slot-btn:disabled {
             background: #666;
             cursor: not-allowed;
-            transform: none;
         }
         
-        /* 移动端控制面板 */
-        .mobile-controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin: 15px 0;
+        /* 紧凑统计面板 */
+        .compact-stats {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+            max-height: 150px;
+            overflow-y: auto;
         }
         
-        .mobile-control-btn {
-            background: rgba(33, 150, 243, 0.8);
-            color: white;
-            border: none;
-            padding: 12px 5px;
-            border-radius: 10px;
-            font-size: 12px;
-            cursor: pointer;
-            min-height: 40px;
-            touch-action: manipulation;
-        }
-        
-        /* 移动端统计卡片 */
-        .mobile-stats {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 10px;
-            margin-bottom: 15px;
+        .stats-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
         }
         
-        .stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 12px;
+        .stat-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 8px;
             text-align: center;
-            border-left: 4px solid #4CAF50;
+            border-left: 3px solid #4CAF50;
         }
         
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #aaa;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .stat-value {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
-            color: #fff;
         }
         
-        /* 移动端表格（简化版） */
-        .mobile-records {
-            background: rgba(0, 0, 0, 0.2);
+        /* 紧凑记录区域 */
+        .compact-records {
+            background: rgba(0,0,0,0.2);
             border-radius: 10px;
-            padding: 10px;
-            margin-top: 10px;
-            max-height: 200px;
+            padding: 8px;
+            flex: 1;
+            min-height: 0;
             overflow-y: auto;
+            max-height: 180px;
+        }
+        
+        .records-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
         }
         
         .record-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 11px;
+        }
+        
+        /* 极简滚动条 */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(76, 175, 80, 0.5);
+            border-radius: 2px;
         }
         
         /* 横屏优化 */
         @media (orientation: landscape) {
-            .mobile-columns {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
+            .compact-container {
+                padding: 5px;
             }
             
-            .mobile-ad-slot {
-                width: 48%;
-                min-height: 180px;
+            .compact-ad-slots {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+            }
+            
+            .ad-slot {
+                min-height: 130px;
+                max-height: 140px;
+                padding: 8px;
+            }
+            
+            .compact-stats {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                max-height: 120px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .compact-records {
+                max-height: 120px;
             }
         }
         
-        /* 平板优化 */
-        @media (min-width: 768px) {
-            .mobile-container {
-                max-width: 800px;
+        /* 超小屏幕优化 */
+        @media (max-width: 320px) {
+            .compact-controls {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            .mobile-columns {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-between;
+            .compact-ad-slots {
+                gap: 5px;
             }
             
-            .mobile-ad-slot {
-                width: 32%;
-                min-height: 200px;
+            .ad-slot {
+                padding: 6px;
+                min-height: 130px;
             }
             
-            .mobile-controls {
-                grid-template-columns: repeat(6, 1fr);
+            .slot-status {
+                font-size: 10px;
+                padding: 6px;
+                min-height: 35px;
+            }
+            
+            .slot-btn {
+                font-size: 11px;
+                padding: 6px 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
         /* 动画 */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
@@ -302,151 +360,152 @@
             animation: fadeIn 0.3s ease;
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+        
         /* 防止IOS橡皮筋效果 */
         .no-bounce {
-            overflow: hidden;
-            position: fixed;
-            height: 100%;
-            width: 100%;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
 <body class="no-bounce">
-    <div class="mobile-container fade-in">
-        <!-- 移动端头部 -->
-        <div class="mobile-header">
-            <div class="mobile-title">💰 广告收益游戏</div>
-            <div class="mobile-mode" id="mode-badge">🎬 模拟模式</div>
+    <div class="compact-container fade-in">
+        <!-- 头部 -->
+        <div class="compact-header">
+            <div class="game-title">💰 收益游戏</div>
+            <div class="mode-badge" id="mode-badge">🎬 模拟模式</div>
         </div>
         
         <!-- 控制按钮 -->
-        <div class="mobile-controls">
-            <button class="mobile-control-btn" onclick="showAllAds()">🚀 一键测试</button>
-            <button class="mobile-control-btn" onclick="resetGame()">🔄 重置</button>
-            <button class="mobile-control-btn" onclick="tryRealMode()">💰 真实模式</button>
-            <button class="mobile-control-btn" onclick="exportData()">💾 导出</button>
-            <button class="mobile-control-btn" onclick="showHelp()">❓ 帮助</button>
-            <button class="mobile-control-btn" onclick="toggleTheme()">🎨 主题</button>
+        <div class="compact-controls">
+            <button class="control-btn test" onclick="testUnity()">
+                <span>🔗</span>
+                <span>连接测试</span>
+            </button>
+            <button class="control-btn reset" onclick="resetGame()">
+                <span>🔄</span>
+                <span>重置</span>
+            </button>
+            <button class="control-btn real" onclick="tryRealMode()">
+                <span>💰</span>
+                <span>真实模式</span>
+            </button>
+            <button class="control-btn help" onclick="showHelp()">
+                <span>❓</span>
+                <span>帮助</span>
+            </button>
+            <button class="control-btn theme" onclick="toggleTheme()">
+                <span>🎨</span>
+                <span>主题</span>
+            </button>
+            <button class="control-btn export" onclick="exportData()">
+                <span>💾</span>
+                <span>导出</span>
+            </button>
         </div>
         
-        <!-- 广告位（移动端垂直排列） -->
-        <div class="mobile-columns">
+        <!-- 三个广告位 -->
+        <div class="compact-ad-slots">
             <!-- 广告位1 -->
-            <div class="mobile-ad-slot">
+            <div class="ad-slot">
                 <div class="slot-header">
                     <div class="slot-number">1</div>
-                    <div class="slot-title">广告位 1</div>
+                    <div class="slot-title">广告位1</div>
                 </div>
-                <div class="slot-content">
-                    <div class="slot-status" id="status1">✅ 准备就绪</div>
-                    <div class="slot-earnings">
-                        收益: <span class="earnings-amount" id="earnings1">$0.00</span>
-                    </div>
-                    <button class="mobile-ad-btn" onclick="showAd(1)" id="btn1">
-                        🎬 观看广告
-                    </button>
+                <div class="slot-status" id="status1">✅ 准备就绪</div>
+                <div class="slot-earnings">
+                    收益: <span class="earnings-amount" id="earnings1">$0.00</span>
                 </div>
+                <button class="slot-btn" onclick="showAd(1)" id="btn1">
+                    🎬 观看广告
+                </button>
             </div>
             
             <!-- 广告位2 -->
-            <div class="mobile-ad-slot">
+            <div class="ad-slot">
                 <div class="slot-header">
                     <div class="slot-number">2</div>
-                    <div class="slot-title">广告位 2</div>
+                    <div class="slot-title">广告位2</div>
                 </div>
-                <div class="slot-content">
-                    <div class="slot-status" id="status2">✅ 准备就绪</div>
-                    <div class="slot-earnings">
-                        收益: <span class="earnings-amount" id="earnings2">$0.00</span>
-                    </div>
-                    <button class="mobile-ad-btn" onclick="showAd(2)" id="btn2">
-                        🎬 观看广告
-                    </button>
+                <div class="slot-status" id="status2">✅ 准备就绪</div>
+                <div class="slot-earnings">
+                    收益: <span class="earnings-amount" id="earnings2">$0.00</span>
                 </div>
+                <button class="slot-btn" onclick="showAd(2)" id="btn2">
+                    🎬 观看广告
+                </button>
             </div>
             
             <!-- 广告位3 -->
-            <div class="mobile-ad-slot">
+            <div class="ad-slot">
                 <div class="slot-header">
                     <div class="slot-number">3</div>
-                    <div class="slot-title">广告位 3</div>
+                    <div class="slot-title">广告位3</div>
                 </div>
-                <div class="slot-content">
-                    <div class="slot-status" id="status3">✅ 准备就绪</div>
-                    <div class="slot-earnings">
-                        收益: <span class="earnings-amount" id="earnings3">$0.00</span>
-                    </div>
-                    <button class="mobile-ad-btn" onclick="showAd(3)" id="btn3">
-                        🎬 观看广告
-                    </button>
+                <div class="slot-status" id="status3">✅ 准备就绪</div>
+                <div class="slot-earnings">
+                    收益: <span class="earnings-amount" id="earnings3">$0.00</span>
                 </div>
+                <button class="slot-btn" onclick="showAd(3)" id="btn3">
+                    🎬 观看广告
+                </button>
             </div>
         </div>
         
-        <!-- 移动端统计 -->
-        <div class="mobile-stats">
-            <div style="text-align:center;font-size:16px;font-weight:bold;margin-bottom:15px;">
-                📊 收益统计
+        <!-- 统计面板 -->
+        <div class="compact-stats">
+            <div class="stats-title">
+                <span>📊 收益统计</span>
+                <span style="font-size:11px;color:#aaa;" id="recordCount">0条记录</span>
             </div>
             
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-item">
                     <div class="stat-label">今日收益</div>
                     <div class="stat-value" id="todayEarnings">$0.00</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-item">
                     <div class="stat-label">累计收益</div>
                     <div class="stat-value" id="totalEarnings">$0.00</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-item">
                     <div class="stat-label">广告展示</div>
                     <div class="stat-value" id="impressions">0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-item">
                     <div class="stat-label">点击率</div>
                     <div class="stat-value" id="clickRate">0%</div>
                 </div>
             </div>
-            
-            <!-- 收益记录 -->
-            <div style="margin-top:15px;">
-                <div style="font-size:14px;font-weight:bold;margin-bottom:10px;display:flex;justify-content:space-between;">
-                    <span>📅 今日记录</span>
-                    <span style="font-size:12px;color:#aaa;" id="recordCount">0条</span>
-                </div>
-                <div class="mobile-records" id="dailyRecords">
-                    <div style="text-align:center;padding:20px;color:#aaa;">
-                        暂无收益记录
-                    </div>
+        </div>
+        
+        <!-- 收益记录 -->
+        <div class="compact-records">
+            <div class="records-title">
+                <span>📅 今日记录</span>
+                <span style="font-size:10px;color:#4CAF50;" id="todayDate"></span>
+            </div>
+            <div id="recordsList">
+                <div style="text-align:center;padding:10px;color:#666;font-size:12px;">
+                    暂无收益记录
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== 移动端优化 ==========
-        // 检测设备类型
+        // ========== 设备检测 ==========
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        
-        // 移动端优化设置
-        if (isMobile) {
-            console.log('📱 移动设备检测: ', isIOS ? 'iOS' : isAndroid ? 'Android' : 'Mobile');
-            
-            // 添加移动端特定样式
-            document.documentElement.style.setProperty('--touch-optimized', 'true');
-            
-            // 防止双击缩放
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(event) {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) {
-                    event.preventDefault();
-                }
-                lastTouchEnd = now;
-            }, false);
-        }
         
         // ========== 游戏配置 ==========
         const CONFIG = {
@@ -469,96 +528,47 @@
             todayDate: new Date().toLocaleDateString('zh-CN')
         };
         
-        // ========== 移动端广告系统 ==========
-        class MobileAdSystem {
+        // ========== 紧凑广告系统 ==========
+        class CompactAdSystem {
             constructor() {
-                console.log('📱 移动端广告系统启动');
+                console.log('📱 紧凑版广告系统启动');
+                this.updateModeDisplay();
                 this.init();
             }
             
             init() {
-                // 更新模式显示
-                this.updateModeDisplay();
-                
-                // 移动端特定优化
+                // 移动端优化
                 if (isMobile) {
                     this.optimizeForMobile();
                 }
+                
+                // 更新日期显示
+                document.getElementById('todayDate').textContent = gameData.todayDate;
             }
             
             optimizeForMobile() {
-                console.log('⚡ 进行移动端优化...');
+                console.log('📱 移动端优化...');
                 
-                // 增大触摸目标
+                // 防止双击缩放
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', (e) => {
+                    const now = Date.now();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+                
+                // 优化按钮触摸
                 document.querySelectorAll('button').forEach(btn => {
-                    btn.style.minHeight = '44px';
+                    btn.style.minHeight = '36px';
+                    btn.addEventListener('touchstart', () => {
+                        btn.style.opacity = '0.8';
+                    });
+                    btn.addEventListener('touchend', () => {
+                        btn.style.opacity = '1';
+                    });
                 });
-                
-                // 优化滚动
-                document.body.style.overflow = 'hidden';
-                document.documentElement.style.overflow = 'hidden';
-                
-                // 添加移动端提示
-                if (!localStorage.getItem('mobileTipShown')) {
-                    setTimeout(() => {
-                        this.showMobileTip();
-                        localStorage.setItem('mobileTipShown', 'true');
-                    }, 1500);
-                }
-            }
-            
-            showMobileTip() {
-                const tip = document.createElement('div');
-                tip.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.9);
-                    z-index: 10000;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    padding: 20px;
-                    text-align: center;
-                `;
-                
-                tip.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 25px; border-radius: 20px; max-width: 400px; width: 90%;">
-                        <h2 style="color: #4CAF50; margin-bottom: 20px;">📱 移动端使用提示</h2>
-                        
-                        <div style="text-align: left; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <div style="background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">
-                                    1
-                                </div>
-                                <span>按钮已优化，便于点击</span>
-                            </div>
-                            
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <div style="background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">
-                                    2
-                                </div>
-                                <span>建议横屏获得更好体验</span>
-                            </div>
-                            
-                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <div style="background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">
-                                    3
-                                </div>
-                                <span>点击广告按钮开始赚钱</span>
-                            </div>
-                        </div>
-                        
-                        <button onclick="this.parentElement.parentElement.remove()" style="background: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; width: 100%;">
-                            开始游戏
-                        </button>
-                    </div>
-                `;
-                
-                document.body.appendChild(tip);
             }
             
             updateModeDisplay() {
@@ -566,16 +576,16 @@
                 if (badge) {
                     if (CONFIG.mode === 'real') {
                         badge.textContent = '💰 真实收益';
-                        badge.style.background = '#4CAF50';
+                        badge.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
                     } else {
                         badge.textContent = '🎬 模拟模式';
-                        badge.style.background = '#FF9800';
+                        badge.style.background = 'linear-gradient(135deg, #FF9800, #FF5722)';
                     }
                 }
             }
             
             async showAd(adSlotId) {
-                if (CONFIG.mode === 'real') {
+                if (CONFIG.mode === 'real' && typeof unityads !== 'undefined') {
                     return this.showRealAd(adSlotId);
                 } else {
                     return this.showSimulationAd(adSlotId);
@@ -583,23 +593,8 @@
             }
             
             async showRealAd(adSlotId) {
-                console.log(`🎬 移动端真实广告 ${adSlotId}`);
+                console.log(`🎬 真实广告 ${adSlotId}`);
                 
-                if (typeof unityads === 'undefined') {
-                    // 尝试加载Unity SDK
-                    return new Promise((resolve) => {
-                        this.loadUnitySDK().then(success => {
-                            if (success) {
-                                this.showRealAd(adSlotId).then(resolve);
-                            } else {
-                                // 加载失败，切换到模拟
-                                this.showSimulationAd(adSlotId).then(resolve);
-                            }
-                        });
-                    });
-                }
-                
-                // 真实广告逻辑
                 const adUnitId = CONFIG.adUnits[adSlotId - 1];
                 
                 return new Promise((resolve) => {
@@ -613,104 +608,66 @@
                             }
                         },
                         onFailed: (error) => {
-                            console.error('移动端真实广告失败:', error);
+                            console.error('真实广告失败:', error);
                             this.showSimulationAd(adSlotId).then(resolve);
                         }
                     });
                 });
             }
             
-            async loadUnitySDK() {
+            async showSimulationAd(adSlotId) {
                 return new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    script.src = 'https://cdn.unityads.unity3d.com/unity-ads-sdk.js';
-                    script.crossOrigin = 'anonymous';
-                    
-                    script.onload = () => {
-                        if (typeof unityads !== 'undefined') {
-                            // 初始化Unity
-                            unityads.init(CONFIG.gameId, {
-                                testMode: false,
-                                onInitialized: () => {
-                                    console.log('✅ 移动端Unity初始化成功');
-                                    CONFIG.mode = 'real';
-                                    this.updateModeDisplay();
-                                    resolve(true);
-                                },
-                                onFailed: (error) => {
-                                    console.error('❌ 移动端Unity初始化失败:', error);
-                                    resolve(false);
-                                }
-                            });
-                        } else {
-                            resolve(false);
-                        }
-                    };
-                    
-                    script.onerror = () => {
-                        console.log('❌ 移动端Unity SDK加载失败');
-                        resolve(false);
-                    };
-                    
-                    document.head.appendChild(script);
+                    this.showCompactAdInterface(adSlotId, resolve);
                 });
             }
             
-            showSimulationAd(adSlotId) {
-                return new Promise((resolve) => {
-                    this.showMobileAdInterface(adSlotId, resolve);
-                });
-            }
-            
-            showMobileAdInterface(adSlotId, resolve) {
+            showCompactAdInterface(adSlotId, resolve) {
                 const overlay = document.createElement('div');
                 overlay.style.cssText = `
                     position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.95);
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.98);
                     z-index: 9999;
                     display: flex;
-                    flex-direction: column;
                     justify-content: center;
                     align-items: center;
-                    padding: 20px;
+                    padding: 15px;
                 `;
                 
                 const earnings = CONFIG.baseEarnings * (0.8 + Math.random() * 0.4);
+                const adColors = ['#4CAF50', '#2196F3', '#9C27B0'];
+                const adColor = adColors[adSlotId - 1];
                 
                 overlay.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; text-align: center;">
-                        <div style="font-size: 50px; margin-bottom: 15px;">📱</div>
-                        <h3 style="margin-bottom: 10px; color: #4CAF50;">广告演示</h3>
-                        <p style="opacity: 0.8; margin-bottom: 20px;">广告位 ${adSlotId} | 30秒演示</p>
+                    <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; border-radius: 15px; padding: 20px; width: 100%; max-width: 350px; text-align: center; border: 2px solid ${adColor};">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📱</div>
+                        <h3 style="color: ${adColor}; margin-bottom: 10px;">广告演示 ${adSlotId}</h3>
                         
-                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; margin-bottom: 20px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px;">
                                 <div>
-                                    <div style="font-size: 12px; opacity: 0.7;">预估收益</div>
-                                    <div style="color: #4CAF50; font-size: 24px; font-weight: bold;">$${earnings.toFixed(2)}</div>
+                                    <div style="opacity: 0.7;">收益</div>
+                                    <div style="color: #4CAF50; font-weight: bold; font-size: 18px;">$${earnings.toFixed(2)}</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 12px; opacity: 0.7;">剩余时间</div>
-                                    <div style="font-size: 24px; font-weight: bold;" id="ad-timer">30</div>
+                                    <div style="opacity: 0.7;">时间</div>
+                                    <div style="font-weight: bold;" id="ad-timer">30秒</div>
                                 </div>
                             </div>
                             
-                            <div style="width: 100%; background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px;">
-                                <div id="ad-progress" style="width: 0%; height: 100%; background: #4CAF50; border-radius: 4px; transition: width 1s linear;"></div>
+                            <div style="width: 100%; background: rgba(255,255,255,0.1); height: 5px; border-radius: 3px;">
+                                <div id="ad-progress" style="width: 0%; height: 100%; background: ${adColor}; border-radius: 3px; transition: width 1s linear;"></div>
                             </div>
                         </div>
                         
-                        <button id="complete-btn" style="background: #4CAF50; color: white; border: none; padding: 18px; border-radius: 25px; font-size: 18px; font-weight: bold; width: 100%; margin-top: 10px;">
-                            完成观看 (+$${earnings.toFixed(2)})
+                        <button id="ad-complete" style="background: ${adColor}; color: white; border: none; padding: 12px 0; border-radius: 20px; font-size: 16px; font-weight: bold; width: 100%; margin-top: 10px;">
+                            完成 (+$${earnings.toFixed(2)})
                         </button>
                         
                         ${CONFIG.mode === 'simulation' ? `
-                        <div style="margin-top: 20px; font-size: 12px; opacity: 0.6; padding: 10px; background: rgba(255,152,0,0.1); border-radius: 10px;">
-                            💡 提示：使用VPN可切换到真实收益模式
+                        <div style="margin-top: 15px; font-size: 11px; opacity: 0.6; padding: 8px; background: rgba(255,152,0,0.1); border-radius: 8px;">
+                            💡 使用VPN可切换到真实收益模式
                         </div>
                         ` : ''}
                     </div>
@@ -725,7 +682,7 @@
                 
                 function updateTimer() {
                     timeLeft--;
-                    timerEl.textContent = timeLeft;
+                    timerEl.textContent = `${timeLeft}秒`;
                     const progress = ((30 - timeLeft) / 30) * 100;
                     progressEl.style.width = `${progress}%`;
                     
@@ -744,16 +701,24 @@
                     resolve({ success: true, isRealAd: false });
                 }
                 
-                // 触摸事件优化
-                const completeBtn = document.getElementById('complete-btn');
-                completeBtn.addEventListener('click', completeAd);
-                completeBtn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    completeAd();
-                });
+                const completeBtn = document.getElementById('ad-complete');
+                completeBtn.onclick = completeAd;
+                
+                // 移动端触摸优化
+                if (isMobile) {
+                    completeBtn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        completeBtn.style.opacity = '0.8';
+                    });
+                    
+                    completeBtn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        completeBtn.style.opacity = '1';
+                    });
+                }
             }
             
-            recordAdComplete(adSlotId, isRealAd, earnings) {
+            recordAdComplete(adSlotId, isRealAd, earnings = CONFIG.baseEarnings) {
                 const adId = adSlotId - 1;
                 
                 gameData.impressions++;
@@ -787,16 +752,10 @@
                     type: type
                 };
                 
-                // 添加到今日记录
-                if (!gameData.dailyRecords[gameData.todayDate]) {
-                    gameData.dailyRecords[gameData.todayDate] = [];
-                }
+                gameData.dailyRecords.unshift(record);
                 
-                gameData.dailyRecords[gameData.todayDate].unshift(record);
-                
-                // 限制记录数量
-                if (gameData.dailyRecords[gameData.todayDate].length > 20) {
-                    gameData.dailyRecords[gameData.todayDate] = gameData.dailyRecords[gameData.todayDate].slice(0, 20);
+                if (gameData.dailyRecords.length > 10) {
+                    gameData.dailyRecords = gameData.dailyRecords.slice(0, 10);
                 }
             }
             
@@ -810,19 +769,14 @@
                 
                 if (earningsEl) {
                     earningsEl.textContent = '$' + gameData.adEarnings[adSlotId - 1].toFixed(2);
-                    
-                    // 移动端动画
-                    earningsEl.style.transition = 'transform 0.3s';
-                    earningsEl.style.transform = 'scale(1.2)';
-                    setTimeout(() => {
-                        earningsEl.style.transform = 'scale(1)';
-                    }, 300);
+                    earningsEl.classList.add('pulse');
+                    setTimeout(() => earningsEl.classList.remove('pulse'), 500);
                 }
             }
         }
         
         // ========== 初始化 ==========
-        const adSystem = new MobileAdSystem();
+        const adSystem = new CompactAdSystem();
         
         // 冷却计时器
         setInterval(() => {
@@ -844,15 +798,9 @@
             const btn = document.getElementById(`btn${adIndex}`);
             const statusEl = document.getElementById(`status${adIndex}`);
             
-            // 移动端优化：禁用按钮防止多次点击
             btn.disabled = true;
             btn.innerHTML = '⏳ 加载中...';
             statusEl.innerHTML = '⏳ 准备广告...';
-            
-            // 移动端触摸反馈
-            if (isMobile) {
-                btn.style.opacity = '0.8';
-            }
             
             try {
                 const result = await adSystem.showAd(adIndex);
@@ -871,13 +819,9 @@
                 statusEl.innerHTML = '❌ 广告失败';
             }
             
-            // 恢复按钮状态
             setTimeout(() => {
                 btn.disabled = false;
                 btn.innerHTML = '🎬 观看广告';
-                if (isMobile) {
-                    btn.style.opacity = '1';
-                }
             }, 1000);
         }
         
@@ -915,22 +859,20 @@
                 if (el) el.textContent = '$' + gameData.adEarnings[i].toFixed(2);
             }
             
+            // 更新记录数量
+            document.getElementById('recordCount').textContent = `${gameData.dailyRecords.length}条记录`;
+            
             saveGameData();
         }
         
         // 更新日收益记录
         function updateDailyRecords() {
-            const container = document.getElementById('dailyRecords');
+            const container = document.getElementById('recordsList');
             if (!container) return;
             
-            const todayRecords = gameData.dailyRecords[gameData.todayDate] || [];
-            
-            // 更新记录数量
-            document.getElementById('recordCount').textContent = `${todayRecords.length}条`;
-            
-            if (todayRecords.length === 0) {
+            if (gameData.dailyRecords.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center;padding:20px;color:#aaa;">
+                    <div style="text-align:center;padding:10px;color:#666;font-size:12px;">
                         暂无收益记录
                     </div>
                 `;
@@ -939,12 +881,12 @@
             
             container.innerHTML = '';
             
-            todayRecords.forEach(record => {
+            gameData.dailyRecords.forEach(record => {
                 const item = document.createElement('div');
                 item.className = 'record-item';
                 item.innerHTML = `
                     <span>${record.time}</span>
-                    <span>广告位 ${record.adSlot}</span>
+                    <span>广告位${record.adSlot}</span>
                     <span style="color: ${record.type === '真实' ? '#4CAF50' : '#FF9800'}; font-weight: bold;">
                         $${record.earnings}
                     </span>
@@ -956,7 +898,7 @@
         // 保存数据
         function saveGameData() {
             try {
-                localStorage.setItem('mobileAdGameData', JSON.stringify(gameData));
+                localStorage.setItem('compactGameData', JSON.stringify(gameData));
             } catch (error) {
                 console.log('保存失败:', error);
             }
@@ -965,7 +907,7 @@
         // 加载数据
         function loadGameData() {
             try {
-                const saved = localStorage.getItem('mobileAdGameData');
+                const saved = localStorage.getItem('compactGameData');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     const today = new Date().toLocaleDateString('zh-CN');
@@ -974,6 +916,7 @@
                         parsed.todayEarnings = 0;
                         parsed.todayDate = today;
                         parsed.adCooldowns = [0, 0, 0];
+                        parsed.dailyRecords = [];
                     }
                     
                     gameData = {
@@ -981,7 +924,7 @@
                         ...parsed,
                         adCooldowns: parsed.adCooldowns || [0, 0, 0],
                         adEarnings: parsed.adEarnings || [0, 0, 0],
-                        dailyRecords: parsed.dailyRecords || {}
+                        dailyRecords: parsed.dailyRecords || []
                     };
                     
                     updateStats();
@@ -993,19 +936,28 @@
             }
         }
         
-        // ========== 移动端控制功能 ==========
-        window.showAllAds = function() {
-            for (let i = 1; i <= 3; i++) {
-                if (gameData.adCooldowns[i - 1] === 0) {
-                    setTimeout(() => {
-                        const btn = document.getElementById(`btn${i}`);
-                        if (btn && !btn.disabled) {
-                            showAd(i);
-                        }
-                    }, i * 800);
-                }
+        // ========== 控制功能 ==========
+        window.testUnity = async function() {
+            const canAccess = await testNetwork();
+            
+            if (canAccess) {
+                alert('✅ 网络连接正常\n可以尝试切换到真实模式');
+            } else {
+                alert('❌ 网络连接失败\n请检查VPN连接');
             }
         };
+        
+        async function testNetwork() {
+            try {
+                await fetch('https://cdn.unityads.unity3d.com/', { 
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
         
         window.resetGame = function() {
             if (confirm('确定要重置所有游戏数据吗？')) {
@@ -1016,7 +968,7 @@
                     totalEarnings: 0,
                     adCooldowns: [0, 0, 0],
                     adEarnings: [0, 0, 0],
-                    dailyRecords: {},
+                    dailyRecords: [],
                     todayDate: new Date().toLocaleDateString('zh-CN')
                 };
                 
@@ -1028,60 +980,78 @@
             }
         };
         
-        window.tryRealMode = function() {
+        window.tryRealMode = async function() {
             if (CONFIG.mode === 'real') {
                 alert('💰 已经是真实收益模式');
                 return;
             }
             
-            if (confirm('切换到真实收益模式？\n\n需要：\n✅ 海外网络或VPN连接\n✅ 允许加载Unity SDK\n\n确定要切换吗？')) {
-                adSystem.loadUnitySDK().then(success => {
-                    if (success) {
-                        alert('🎉 已切换到真实收益模式！\n💰 现在开始产生真实美元收益！');
-                    } else {
-                        alert('❌ 切换失败\n请检查网络或使用VPN连接后重试');
-                    }
-                });
+            const useVPN = confirm('切换到真实收益模式？\n\n需要：\n✅ 海外网络或VPN连接\n\n确定要切换吗？');
+            
+            if (!useVPN) return;
+            
+            // 测试网络
+            const networkOk = await testNetwork();
+            
+            if (!networkOk) {
+                alert('❌ 网络测试失败\n请确认VPN已连接并刷新页面');
+                return;
             }
-        };
-        
-        window.exportData = function() {
-            const dataStr = JSON.stringify(gameData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const fileName = `广告收益数据_${new Date().toISOString().split('T')[0]}.json`;
             
-            const link = document.createElement('a');
-            link.setAttribute('href', dataUri);
-            link.setAttribute('download', fileName);
-            link.click();
+            // 加载Unity SDK
+            const script = document.createElement('script');
+            script.src = 'https://cdn.unityads.unity3d.com/unity-ads-sdk.js';
+            script.crossOrigin = 'anonymous';
             
-            alert('✅ 数据已导出为JSON文件');
+            script.onload = function() {
+                if (typeof unityads !== 'undefined') {
+                    unityads.init(CONFIG.gameId, {
+                        testMode: false,
+                        onInitialized: function() {
+                            CONFIG.mode = 'real';
+                            adSystem.updateModeDisplay();
+                            alert('🎉 成功切换到真实收益模式！\n💰 现在开始产生真实美元收益！');
+                        },
+                        onFailed: function(error) {
+                            alert('❌ Unity初始化失败\n请稍后重试');
+                        }
+                    });
+                } else {
+                    alert('❌ Unity SDK加载失败');
+                }
+            };
+            
+            script.onerror = function() {
+                alert('❌ 无法加载Unity SDK\n请检查VPN连接');
+            };
+            
+            document.head.appendChild(script);
         };
         
         window.showHelp = function() {
             const helpText = `
-📱 移动端使用指南：
+📱 紧凑版使用指南：
 
 🎮 基本操作：
-1. 点击"观看广告"按钮开始
-2. 等待30秒广告演示完成
+1. 点击"观看广告"按钮
+2. 等待30秒广告演示
 3. 获得模拟收益
 
 💰 收益模式：
-- 模拟模式：所有用户可用
-- 真实模式：需要VPN连接
+• 模拟模式：所有用户可用
+• 真实模式：需要VPN连接
 
-⚡ 优化提示：
-- 按钮已放大便于点击
-- 建议横屏获得更好体验
-- 冷却时间30秒
+⚡ 优化特性：
+• 紧凑布局，适合手机
+• 触摸优化，按钮易点击
+• 自动保存数据
 
 🌐 网络说明：
-- 中国大陆访问Unity受限
-- 海外/VPN用户可切换真实模式
+• 中国大陆访问Unity受限
+• 海外/VPN用户可用真实模式
 
 💡 建议：
-先用模拟模式熟悉游戏
+先用模拟模式体验
 有条件再切换到真实模式
             `;
             
@@ -1102,10 +1072,44 @@
             }
         };
         
+        window.exportData = function() {
+            const dataStr = JSON.stringify(gameData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const fileName = `收益数据_${gameData.todayDate.replace(/\//g, '-')}.json`;
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri);
+            link.setAttribute('download', fileName);
+            link.click();
+            
+            alert('✅ 数据已导出为JSON文件');
+        };
+        
+        // 一键测试所有广告
+        window.testAllAds = function() {
+            for (let i = 1; i <= 3; i++) {
+                if (gameData.adCooldowns[i - 1] === 0) {
+                    setTimeout(() => {
+                        const btn = document.getElementById(`btn${i}`);
+                        if (btn && !btn.disabled) {
+                            showAd(i);
+                        }
+                    }, i * 800);
+                }
+            }
+        };
+        
+        // 添加快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                resetGame();
+            }
+        });
+        
         // ========== 页面加载 ==========
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('📱 移动端优化版游戏加载完成');
-            console.log('设备类型:', isMobile ? (isIOS ? 'iOS' : 'Android') : '桌面端');
+            console.log('📱 紧凑版游戏加载完成');
             
             // 加载数据
             loadGameData();
@@ -1113,24 +1117,17 @@
             // 自动保存
             setInterval(saveGameData, 30000);
             
-            // 移动端额外优化
+            // 移动端优化
             if (isMobile) {
-                // 防止滚动
-                document.addEventListener('touchmove', function(e) {
-                    if (e.target.tagName === 'BUTTON') {
+                // 防止下拉刷新
+                document.addEventListener('touchmove', (e) => {
+                    if (window.scrollY === 0) {
                         e.preventDefault();
                     }
                 }, { passive: false });
-                
-                // 横屏检测
-                window.addEventListener('orientationchange', function() {
-                    setTimeout(() => {
-                        alert('🔄 检测到屏幕方向变化，已优化布局');
-                    }, 500);
-                });
             }
             
-            console.log('✅ 游戏就绪，欢迎体验！');
+            console.log('✅ 游戏就绪！');
         });
         
         // 自动保存
