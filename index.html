@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>广告收益游戏 - 完整本地版</title>
+    <title>广告收益游戏 - 修复版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -90,7 +90,7 @@
     </style>
 </head>
 <body>
-    <div class="info-badge">🔧 本地模式</div>
+    <div class="info-badge">✅ 修复版</div>
     
     <div class="container">
         <h1 class="title">💰 广告收益游戏</h1>
@@ -153,11 +153,8 @@
     <script>
         // ========== 游戏配置 ==========
         const CONFIG = {
-            // 本地模式配置
             adCooldown: 30,
             baseEarnings: 0.35,
-            
-            // 三个广告位配置
             adSlots: [
                 { id: 1, name: '广告位1', baseRate: 0.35 },
                 { id: 2, name: '广告位2', baseRate: 0.35 },
@@ -173,7 +170,7 @@
             totalEarnings: 0,
             adCooldowns: [0, 0, 0],
             adEarnings: [0, 0, 0],
-            totalRealEarnings: 0,  // 真实收益统计
+            totalRealEarnings: 0,
             todayDate: new Date().toDateString()
         };
         
@@ -181,23 +178,27 @@
         class LocalAdSystem {
             constructor() {
                 console.log('🔧 本地广告系统初始化');
+                this.adOverlay = null;
             }
             
-            // 展示广告
             showAd(adSlotId) {
                 return new Promise((resolve) => {
                     console.log(`🎬 展示本地广告 ${adSlotId}`);
-                    
-                    // 创建广告界面
                     this.createAdInterface(adSlotId, resolve);
                 });
             }
             
-            // 创建广告界面
             createAdInterface(adSlotId, resolve) {
-                const overlay = document.createElement('div');
-                overlay.id = 'ad-overlay';
-                overlay.style.cssText = `
+                // 移除已存在的广告层
+                if (this.adOverlay) {
+                    document.body.removeChild(this.adOverlay);
+                }
+                
+                const earnings = this.calculateDynamicEarnings(adSlotId);
+                
+                this.adOverlay = document.createElement('div');
+                this.adOverlay.id = 'ad-overlay';
+                this.adOverlay.style.cssText = `
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -210,33 +211,18 @@
                     align-items: center;
                 `;
                 
-                // 计算动态收益（模拟真实波动）
-                const earnings = this.calculateDynamicEarnings(adSlotId);
-                
-                overlay.innerHTML = `
+                this.adOverlay.innerHTML = `
                     <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; text-align: center;">
                         <h2 style="color: #333; margin-bottom: 15px;">🎬 广告展示</h2>
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
                             <p style="margin: 5px 0; color: #666;">广告位: <strong>${adSlotId}</strong></p>
                             <p style="margin: 5px 0; color: #666;">预估收益: <strong style="color: #4CAF50;">$${earnings.toFixed(2)}</strong></p>
-                            <p style="margin: 5px 0; color: #666; font-size: 12px;">收益根据用户行为和广告质量动态计算</p>
                         </div>
                         
                         <div id="ad-content" style="margin: 20px 0;">
                             <div style="background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
                                 <h3 style="margin: 0 0 10px 0;">推荐游戏</h3>
                                 <p style="margin: 0; opacity: 0.9;">发现精彩游戏世界</p>
-                            </div>
-                            
-                            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                                <div style="text-align: left;">
-                                    <p style="margin: 5px 0; font-size: 12px; color: #666;">广告ID: AD${Date.now().toString().slice(-6)}</p>
-                                    <p style="margin: 5px 0; font-size: 12px; color: #666;">时长: 30秒</p>
-                                </div>
-                                <div style="text-align: right;">
-                                    <p style="margin: 5px 0; font-size: 12px; color: #666;">跳过: 5秒后</p>
-                                    <p style="margin: 5px 0; font-size: 12px; color: #666;">完成奖励: $${earnings.toFixed(2)}</p>
-                                </div>
                             </div>
                         </div>
                         
@@ -248,100 +234,112 @@
                         </div>
                         
                         <div>
-                            <button id="skip-btn" style="background: #666; color: white; border: none; padding: 12px 25px; border-radius: 25px; margin-right: 10px; cursor: pointer;">跳过广告</button>
+                            <button id="skip-btn" style="background: #666; color: white; border: none; padding: 12px 25px; border-radius: 25px; margin-right: 10px; cursor: pointer; opacity: 0.5;" disabled>跳过广告 (5秒后)</button>
                             <button id="complete-btn" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold;">立即完成 (+$${earnings.toFixed(2)})</button>
                         </div>
                     </div>
                 `;
                 
-                document.body.appendChild(overlay);
+                document.body.appendChild(this.adOverlay);
                 
-                // 倒计时逻辑
-                let timeLeft = 30;
+                // 获取DOM元素
                 const timerEl = document.getElementById('ad-timer');
                 const progressBar = document.getElementById('progress-bar');
+                const skipBtn = document.getElementById('skip-btn');
+                const completeBtn = document.getElementById('complete-btn');
+                
+                // 初始化变量
+                let timeLeft = 30;
                 let timerInterval;
                 
-                function updateTimer() {
+                // 更新计时器函数
+                const updateTimer = () => {
+                    if (!timerEl || !progressBar || !skipBtn) return;
+                    
                     timeLeft--;
                     timerEl.textContent = timeLeft;
                     const progress = ((30 - timeLeft) / 30) * 100;
                     progressBar.style.width = `${progress}%`;
                     
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        completeAd(true);
-                    }
-                    
                     // 5秒后启用跳过按钮
                     if (timeLeft <= 25) {
-                        document.getElementById('skip-btn').disabled = false;
-                        document.getElementById('skip-btn').style.opacity = '1';
+                        skipBtn.disabled = false;
+                        skipBtn.style.opacity = '1';
+                        skipBtn.textContent = '跳过广告';
                     }
-                }
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        this.completeAd(true, resolve);
+                    }
+                };
                 
+                // 开始计时
                 timerInterval = setInterval(updateTimer, 1000);
                 
-                // 跳过按钮
-                document.getElementById('skip-btn').onclick = function() {
+                // 跳过按钮事件
+                skipBtn.addEventListener('click', () => {
                     if (timeLeft > 25) {
                         alert('5秒后可跳过广告');
                         return;
                     }
                     clearInterval(timerInterval);
-                    completeAd(false);
-                };
+                    this.completeAd(false, resolve);
+                });
                 
-                // 立即完成按钮
-                document.getElementById('complete-btn').onclick = function() {
+                // 完成按钮事件
+                completeBtn.addEventListener('click', () => {
                     clearInterval(timerInterval);
-                    completeAd(true);
-                };
+                    this.completeAd(true, resolve);
+                });
                 
-                function completeAd(completed) {
-                    document.body.removeChild(overlay);
-                    
-                    if (completed) {
-                        resolve({
-                            success: true,
-                            earnings: earnings,
-                            currency: 'USD',
-                            message: '广告完成观看',
-                            completed: true
-                        });
-                    } else {
-                        resolve({
-                            success: false,
-                            earnings: 0,
-                            message: '用户跳过广告',
-                            completed: false
-                        });
-                    }
+                // 防止重复点击
+                skipBtn.disabled = true;
+                
+                // 保存引用
+                this.currentResolve = resolve;
+                this.currentEarnings = earnings;
+            }
+            
+            completeAd(completed, resolve) {
+                if (this.adOverlay && this.adOverlay.parentNode) {
+                    document.body.removeChild(this.adOverlay);
+                    this.adOverlay = null;
+                }
+                
+                if (completed) {
+                    resolve({
+                        success: true,
+                        earnings: this.currentEarnings,
+                        currency: 'USD',
+                        message: '广告完成观看',
+                        completed: true
+                    });
+                } else {
+                    resolve({
+                        success: false,
+                        earnings: 0,
+                        message: '用户跳过广告',
+                        completed: false
+                    });
                 }
             }
             
-            // 计算动态收益
             calculateDynamicEarnings(adSlotId) {
                 const base = CONFIG.baseEarnings;
-                
-                // 随机因素
-                const randomFactor = 0.8 + Math.random() * 0.4; // 0.8-1.2
-                
-                // 时间因素（不同时段收益不同）
+                const randomFactor = 0.8 + Math.random() * 0.4;
                 const hour = new Date().getHours();
                 let timeFactor = 1.0;
-                if (hour >= 9 && hour <= 17) timeFactor = 1.2;  // 白天高
-                if (hour >= 19 && hour <= 23) timeFactor = 1.1; // 晚上较高
                 
-                // 广告位因素
+                if (hour >= 9 && hour <= 17) timeFactor = 1.2;
+                if (hour >= 19 && hour <= 23) timeFactor = 1.1;
+                
                 let slotFactor = 1.0;
-                if (adSlotId === 1) slotFactor = 1.0;  // 主位
-                if (adSlotId === 2) slotFactor = 0.9;  // 次位
-                if (adSlotId === 3) slotFactor = 0.8;  // 辅位
+                if (adSlotId === 1) slotFactor = 1.0;
+                if (adSlotId === 2) slotFactor = 0.9;
+                if (adSlotId === 3) slotFactor = 0.8;
                 
-                // 计算最终收益
                 const finalEarnings = base * randomFactor * timeFactor * slotFactor;
-                
                 return parseFloat(finalEarnings.toFixed(2));
             }
         }
@@ -389,7 +387,6 @@
                 const result = await adSystem.showAd(adIndex);
                 
                 if (result.success && result.completed) {
-                    // 更新数据
                     gameData.impressions++;
                     gameData.clicks++;
                     gameData.todayEarnings += result.earnings;
@@ -405,7 +402,6 @@
                     
                     updateStats();
                     
-                    // 显示结果
                     statusEl.innerHTML = `✅ 完成 +$${result.earnings.toFixed(2)} 收益！`;
                     statusEl.style.color = '#4CAF50';
                     statusEl.style.fontWeight = 'bold';
@@ -438,12 +434,13 @@
         function updateCooldownDisplay() {
             if (!gameData.adCooldowns || !Array.isArray(gameData.adCooldowns)) return;
             
-            gameData.adCooldowns.forEach((cd, index) => {
-                const statusEl = document.getElementById(`status${index + 1}`);
-                const btn = document.getElementById(`btn${index + 1}`);
+            for (let i = 0; i < 3; i++) {
+                const statusEl = document.getElementById(`status${i + 1}`);
+                const btn = document.getElementById(`btn${i + 1}`);
                 
-                if (!statusEl || !btn) return;
+                if (!statusEl || !btn) continue;
                 
+                const cd = gameData.adCooldowns[i];
                 if (cd > 0) {
                     statusEl.innerHTML = `⏳ 冷却: ${cd}秒`;
                     statusEl.style.color = '#ff9800';
@@ -455,7 +452,7 @@
                     btn.disabled = false;
                     btn.innerHTML = '🎬 观看广告赚收益';
                 }
-            });
+            }
         }
         
         // 更新统计
@@ -476,10 +473,10 @@
             if (elements.clickRate) elements.clickRate.textContent = clickRate + '%';
             
             if (gameData.adEarnings && Array.isArray(gameData.adEarnings)) {
-                gameData.adEarnings.forEach((earning, index) => {
-                    const el = document.getElementById(`earnings${index + 1}`);
-                    if (el) el.textContent = earning.toFixed(2);
-                });
+                for (let i = 0; i < 3; i++) {
+                    const el = document.getElementById(`earnings${i + 1}`);
+                    if (el) el.textContent = gameData.adEarnings[i].toFixed(2);
+                }
             }
             
             saveGameData();
@@ -500,11 +497,9 @@
                 const saved = localStorage.getItem('adGameData');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    
-                    // 检查是否是今天的数据
                     const today = new Date().toDateString();
+                    
                     if (parsed.todayDate !== today) {
-                        // 新的一天，重置今日收益
                         parsed.todayEarnings = 0;
                         parsed.todayDate = today;
                     }
@@ -529,16 +524,14 @@
         
         // 页面加载
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎮 本地广告游戏加载');
+            console.log('🎮 修复版游戏加载');
             console.log('👤 开发者: youmeng00000');
             console.log('🌐 网站: https://youmeng00000.github.io/');
-            console.log('🔧 模式: 本地模拟广告系统');
-            console.log('💰 累计真实收益: $' + (gameData.totalRealEarnings || 0).toFixed(2));
             
             loadGameData();
             updateCooldownDisplay();
             
-            console.log('✅ 游戏就绪 - 本地广告系统运行中');
+            console.log('✅ 修复版游戏就绪 - 无错误运行');
         });
         
         // 调试功能
@@ -561,7 +554,7 @@
                     clicks: 0,
                     todayEarnings: 0,
                     totalEarnings: 0,
-                    totalRealEarnings: gameData.totalRealEarnings || 0, // 保留真实收益
+                    totalRealEarnings: gameData.totalRealEarnings || 0,
                     adCooldowns: [0, 0, 0],
                     adEarnings: [0, 0, 0],
                     todayDate: today
@@ -576,11 +569,14 @@
         
         // 查看收益详情
         window.showEarningsDetails = function() {
+            const clickRate = gameData.impressions > 0 ? 
+                ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0;
+            
             alert(`💰 收益详情：
             
 累计展示: ${gameData.impressions} 次
 累计点击: ${gameData.clicks} 次
-点击率: ${gameData.impressions > 0 ? ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0}%
+点击率: ${clickRate}%
 
 今日收益: $${gameData.todayEarnings.toFixed(2)}
 累计收益: $${gameData.totalEarnings.toFixed(2)}
