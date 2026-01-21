@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>广告收益游戏 - 修复版</title>
+    <title>广告收益游戏 - 视频广告版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -90,7 +90,7 @@
     </style>
 </head>
 <body>
-    <div class="info-badge">✅ 修复版</div>
+    <div class="info-badge">🎬 视频广告版</div>
     
     <div class="container">
         <h1 class="title">💰 广告收益游戏</h1>
@@ -99,31 +99,31 @@
             <div class="square">
                 <div>
                     <h3>广告位 1</h3>
-                    <p>本地模拟广告系统</p>
+                    <p>观看视频广告赚收益</p>
                     <div class="ad-status" id="status1">✅ 准备就绪</div>
                     <div style="color:#666;font-size:14px;">收益: $<span id="earnings1">0.00</span></div>
                 </div>
-                <button class="ad-btn" onclick="showAd(1)" id="btn1">🎬 观看广告赚收益</button>
+                <button class="ad-btn" onclick="showAd(1)" id="btn1">🎬 观看视频广告</button>
             </div>
             
             <div class="square">
                 <div>
                     <h3>广告位 2</h3>
-                    <p>本地模拟广告系统</p>
+                    <p>观看视频广告赚收益</p>
                     <div class="ad-status" id="status2">✅ 准备就绪</div>
                     <div style="color:#666;font-size:14px;">收益: $<span id="earnings2">0.00</span></div>
                 </div>
-                <button class="ad-btn" onclick="showAd(2)" id="btn2">🎬 观看广告赚收益</button>
+                <button class="ad-btn" onclick="showAd(2)" id="btn2">🎬 观看视频广告</button>
             </div>
             
             <div class="square">
                 <div>
                     <h3>广告位 3</h3>
-                    <p>本地模拟广告系统</p>
+                    <p>观看视频广告赚收益</p>
                     <div class="ad-status" id="status3">✅ 准备就绪</div>
                     <div style="color:#666;font-size:14px;">收益: $<span id="earnings3">0.00</span></div>
                 </div>
-                <button class="ad-btn" onclick="showAd(3)" id="btn3">🎬 观看广告赚收益</button>
+                <button class="ad-btn" onclick="showAd(3)" id="btn3">🎬 观看视频广告</button>
             </div>
         </div>
         
@@ -155,10 +155,58 @@
         const CONFIG = {
             adCooldown: 30,
             baseEarnings: 0.35,
-            adSlots: [
-                { id: 1, name: '广告位1', baseRate: 0.35 },
-                { id: 2, name: '广告位2', baseRate: 0.35 },
-                { id: 3, name: '广告位3', baseRate: 0.35 }
+            
+            // 视频广告库（免费可用的视频）
+            videoAds: [
+                {
+                    id: 1,
+                    title: "自然风光广告",
+                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4",
+                    duration: 15,
+                    category: "自然"
+                },
+                {
+                    id: 2,
+                    title: "科技产品展示",
+                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-close-up-view-of-a-3d-printer-printing-1171-large.mp4",
+                    duration: 12,
+                    category: "科技"
+                },
+                {
+                    id: 3,
+                    title: "城市夜景",
+                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-city-at-night-1170-large.mp4",
+                    duration: 18,
+                    category: "城市"
+                },
+                {
+                    id: 4,
+                    title: "运动健身",
+                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-young-woman-stretching-after-a-workout-1169-large.mp4",
+                    duration: 14,
+                    category: "运动"
+                },
+                {
+                    id: 5,
+                    title: "美食广告",
+                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-pouring-milk-into-a-glass-1168-large.mp4",
+                    duration: 10,
+                    category: "美食"
+                },
+                {
+                    id: 6,
+                    title: "创意艺术",
+                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-close-view-of-a-potter-making-a-vase-1167-large.mp4",
+                    duration: 16,
+                    category: "艺术"
+                }
+            ],
+            
+            // 备用视频（如果主视频加载失败）
+            backupVideos: [
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             ]
         };
         
@@ -174,37 +222,48 @@
             todayDate: new Date().toDateString()
         };
         
-        // ========== 广告系统 ==========
-        class LocalAdSystem {
+        // ========== 视频广告系统 ==========
+        class VideoAdSystem {
             constructor() {
-                console.log('🔧 本地广告系统初始化');
+                console.log('🎬 视频广告系统初始化');
                 this.adOverlay = null;
+                this.currentVideo = null;
+                this.videoInterval = null;
+                this.timerInterval = null;
             }
             
+            // 展示视频广告
             showAd(adSlotId) {
                 return new Promise((resolve) => {
-                    console.log(`🎬 展示本地广告 ${adSlotId}`);
-                    this.createAdInterface(adSlotId, resolve);
+                    console.log(`📺 展示视频广告 ${adSlotId}`);
+                    this.createVideoAdInterface(adSlotId, resolve);
                 });
             }
             
-            createAdInterface(adSlotId, resolve) {
+            // 创建视频广告界面
+            createVideoAdInterface(adSlotId, resolve) {
                 // 移除已存在的广告层
                 if (this.adOverlay) {
                     document.body.removeChild(this.adOverlay);
+                    this.adOverlay = null;
                 }
                 
+                // 计算收益
                 const earnings = this.calculateDynamicEarnings(adSlotId);
                 
+                // 随机选择一个视频广告
+                const videoAd = this.getRandomVideoAd();
+                
+                // 创建广告层
                 this.adOverlay = document.createElement('div');
-                this.adOverlay.id = 'ad-overlay';
+                this.adOverlay.id = 'video-ad-overlay';
                 this.adOverlay.style.cssText = `
                     position: fixed;
                     top: 0;
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0,0,0,0.95);
+                    background: rgba(0,0,0,0.98);
                     z-index: 9999;
                     display: flex;
                     justify-content: center;
@@ -212,107 +271,285 @@
                 `;
                 
                 this.adOverlay.innerHTML = `
-                    <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%; text-align: center;">
-                        <h2 style="color: #333; margin-bottom: 15px;">🎬 广告展示</h2>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                            <p style="margin: 5px 0; color: #666;">广告位: <strong>${adSlotId}</strong></p>
-                            <p style="margin: 5px 0; color: #666;">预估收益: <strong style="color: #4CAF50;">$${earnings.toFixed(2)}</strong></p>
-                        </div>
-                        
-                        <div id="ad-content" style="margin: 20px 0;">
-                            <div style="background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-                                <h3 style="margin: 0 0 10px 0;">推荐游戏</h3>
-                                <p style="margin: 0; opacity: 0.9;">发现精彩游戏世界</p>
+                    <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #000;">
+                        <!-- 广告头部 -->
+                        <div style="background: rgba(0,0,0,0.8); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+                            <div style="color: white; font-size: 16px; font-weight: bold;">
+                                🎬 视频广告
+                            </div>
+                            <div style="color: #4CAF50; font-size: 14px; font-weight: bold;">
+                                收益: $${earnings.toFixed(2)}
                             </div>
                         </div>
                         
-                        <div style="margin: 20px 0; padding: 15px; background: #e8f5e9; border-radius: 10px;">
-                            <p style="margin: 0 0 10px 0; color: #2E7D32; font-weight: bold;">⏳ 广告倒计时: <span id="ad-timer">30</span>秒</p>
-                            <div style="width: 100%; background: #ddd; border-radius: 5px; height: 10px;">
-                                <div id="progress-bar" style="width: 0%; background: #4CAF50; height: 100%; border-radius: 5px; transition: width 1s linear;"></div>
+                        <!-- 视频播放器 -->
+                        <div style="flex: 1; position: relative; overflow: hidden;">
+                            <video 
+                                id="ad-video-player" 
+                                style="width: 100%; height: 100%; object-fit: contain; background: #000;"
+                                playsinline
+                                webkit-playsinline
+                            >
+                                您的浏览器不支持视频播放
+                            </video>
+                            
+                            <!-- 视频加载提示 -->
+                            <div id="video-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center;">
+                                <div style="font-size: 30px; margin-bottom: 10px;">⏳</div>
+                                <div>视频加载中...</div>
+                            </div>
+                            
+                            <!-- 视频控制层 -->
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px;">
+                                <!-- 进度条 -->
+                                <div style="width: 100%; background: rgba(255,255,255,0.3); height: 4px; border-radius: 2px; margin-bottom: 10px;">
+                                    <div id="video-progress-bar" style="width: 0%; height: 100%; background: #4CAF50; border-radius: 2px; transition: width 0.3s;"></div>
+                                </div>
+                                
+                                <!-- 控制按钮 -->
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button id="video-play-pause" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">
+                                        ⏸️
+                                    </button>
+                                    
+                                    <div style="color: white; font-size: 14px;">
+                                        <span id="video-current-time">0:00</span> / <span id="video-total-time">0:00</span>
+                                    </div>
+                                    
+                                    <button id="video-sound-toggle" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">
+                                        🔇
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 广告信息 -->
+                            <div style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 5px; font-size: 12px;">
+                                📢 ${videoAd.category} 广告
                             </div>
                         </div>
                         
-                        <div>
-                            <button id="skip-btn" style="background: #666; color: white; border: none; padding: 12px 25px; border-radius: 25px; margin-right: 10px; cursor: pointer; opacity: 0.5;" disabled>跳过广告 (5秒后)</button>
-                            <button id="complete-btn" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold;">立即完成 (+$${earnings.toFixed(2)})</button>
+                        <!-- 广告底部 -->
+                        <div style="background: rgba(0,0,0,0.9); padding: 20px; border-top: 1px solid #333;">
+                            <!-- 倒计时和跳过 -->
+                            <div style="margin-bottom: 15px;">
+                                <div style="color: white; text-align: center; margin-bottom: 10px; font-size: 14px;">
+                                    ⏳ 广告剩余时间: <span id="ad-countdown" style="font-weight: bold; color: #4CAF50;">${videoAd.duration}</span>秒
+                                </div>
+                                <div style="width: 100%; background: #333; height: 6px; border-radius: 3px;">
+                                    <div id="ad-progress" style="width: 0%; height: 100%; background: #4CAF50; border-radius: 3px; transition: width 1s linear;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- 控制按钮 -->
+                            <div style="display: flex; justify-content: center; gap: 15px;">
+                                <button id="ad-skip-btn" style="background: #666; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; opacity: 0.5;" disabled>
+                                    跳过广告 (<span id="skip-timer">5</span>秒后)
+                                </button>
+                                <button id="ad-complete-btn" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold;">
+                                    观看完成 (+$${earnings.toFixed(2)})
+                                </button>
+                            </div>
+                            
+                            <!-- 广告详情 -->
+                            <div style="color: #888; font-size: 11px; text-align: center; margin-top: 15px;">
+                                <div>广告ID: AD${Date.now().toString().slice(-8)} | 时长: ${videoAd.duration}秒 | 类别: ${videoAd.category}</div>
+                                <div>观看完整视频以获得收益奖励</div>
+                            </div>
                         </div>
                     </div>
                 `;
                 
                 document.body.appendChild(this.adOverlay);
+                document.body.style.overflow = 'hidden'; // 禁止滚动
                 
-                // 获取DOM元素
-                const timerEl = document.getElementById('ad-timer');
-                const progressBar = document.getElementById('progress-bar');
-                const skipBtn = document.getElementById('skip-btn');
-                const completeBtn = document.getElementById('complete-btn');
-                
-                // 初始化变量
-                let timeLeft = 30;
-                let timerInterval;
-                
-                // 更新计时器函数
-                const updateTimer = () => {
-                    if (!timerEl || !progressBar || !skipBtn) return;
-                    
-                    timeLeft--;
-                    timerEl.textContent = timeLeft;
-                    const progress = ((30 - timeLeft) / 30) * 100;
-                    progressBar.style.width = `${progress}%`;
-                    
-                    // 5秒后启用跳过按钮
-                    if (timeLeft <= 25) {
-                        skipBtn.disabled = false;
-                        skipBtn.style.opacity = '1';
-                        skipBtn.textContent = '跳过广告';
-                    }
-                    
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        this.completeAd(true, resolve);
-                    }
-                };
-                
-                // 开始计时
-                timerInterval = setInterval(updateTimer, 1000);
-                
-                // 跳过按钮事件
-                skipBtn.addEventListener('click', () => {
-                    if (timeLeft > 25) {
-                        alert('5秒后可跳过广告');
-                        return;
-                    }
-                    clearInterval(timerInterval);
-                    this.completeAd(false, resolve);
-                });
-                
-                // 完成按钮事件
-                completeBtn.addEventListener('click', () => {
-                    clearInterval(timerInterval);
-                    this.completeAd(true, resolve);
-                });
-                
-                // 防止重复点击
-                skipBtn.disabled = true;
+                // 设置视频播放器
+                this.setupVideoPlayer(videoAd, resolve, earnings);
                 
                 // 保存引用
                 this.currentResolve = resolve;
                 this.currentEarnings = earnings;
+                this.videoDuration = videoAd.duration;
             }
             
-            completeAd(completed, resolve) {
+            // 设置视频播放器
+            setupVideoPlayer(videoAd, resolve, earnings) {
+                const videoPlayer = document.getElementById('ad-video-player');
+                const loadingEl = document.getElementById('video-loading');
+                const playPauseBtn = document.getElementById('video-play-pause');
+                const soundToggleBtn = document.getElementById('video-sound-toggle');
+                const progressBar = document.getElementById('video-progress-bar');
+                const currentTimeEl = document.getElementById('video-current-time');
+                const totalTimeEl = document.getElementById('video-total-time');
+                const skipBtn = document.getElementById('ad-skip-btn');
+                const skipTimerEl = document.getElementById('skip-timer');
+                const completeBtn = document.getElementById('ad-complete-btn');
+                const countdownEl = document.getElementById('ad-countdown');
+                const adProgressEl = document.getElementById('ad-progress');
+                
+                let isPlaying = true;
+                let isMuted = true;
+                let skipTimeLeft = 5;
+                let adTimeLeft = videoAd.duration;
+                let videoLoaded = false;
+                
+                // 设置视频源
+                videoPlayer.src = videoAd.videoUrl;
+                videoPlayer.muted = true; // 默认静音
+                videoPlayer.playsInline = true;
+                
+                // 视频加载事件
+                videoPlayer.addEventListener('loadeddata', () => {
+                    console.log('✅ 视频加载完成');
+                    videoLoaded = true;
+                    loadingEl.style.display = 'none';
+                    
+                    // 设置总时间
+                    const duration = videoPlayer.duration || videoAd.duration;
+                    totalTimeEl.textContent = this.formatTime(duration);
+                    
+                    // 开始播放
+                    videoPlayer.play().catch(e => {
+                        console.log('视频自动播放失败:', e);
+                        // 手动触发播放
+                        playPauseBtn.click();
+                    });
+                });
+                
+                videoPlayer.addEventListener('error', (e) => {
+                    console.log('❌ 视频加载失败:', e);
+                    loadingEl.innerHTML = `
+                        <div style="font-size: 30px; margin-bottom: 10px;">❌</div>
+                        <div>视频加载失败</div>
+                        <div style="font-size: 12px; margin-top: 10px;">正在切换到备用视频...</div>
+                    `;
+                    
+                    // 切换到备用视频
+                    setTimeout(() => {
+                        this.useBackupVideo(videoPlayer, loadingEl);
+                    }, 2000);
+                });
+                
+                // 播放/暂停控制
+                playPauseBtn.addEventListener('click', () => {
+                    if (videoPlayer.paused) {
+                        videoPlayer.play();
+                        playPauseBtn.innerHTML = '⏸️';
+                        isPlaying = true;
+                    } else {
+                        videoPlayer.pause();
+                        playPauseBtn.innerHTML = '▶️';
+                        isPlaying = false;
+                    }
+                });
+                
+                // 音量控制
+                soundToggleBtn.addEventListener('click', () => {
+                    isMuted = !isMuted;
+                    videoPlayer.muted = isMuted;
+                    soundToggleBtn.innerHTML = isMuted ? '🔇' : '🔊';
+                });
+                
+                // 视频进度更新
+                videoPlayer.addEventListener('timeupdate', () => {
+                    if (videoPlayer.duration) {
+                        const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        currentTimeEl.textContent = this.formatTime(videoPlayer.currentTime);
+                    }
+                });
+                
+                // 跳过按钮倒计时
+                const skipTimerInterval = setInterval(() => {
+                    if (skipTimeLeft > 0) {
+                        skipTimeLeft--;
+                        skipTimerEl.textContent = skipTimeLeft;
+                        
+                        if (skipTimeLeft <= 0) {
+                            skipBtn.disabled = false;
+                            skipBtn.style.opacity = '1';
+                            skipBtn.textContent = '跳过广告';
+                            clearInterval(skipTimerInterval);
+                        }
+                    }
+                }, 1000);
+                
+                // 广告总倒计时
+                this.timerInterval = setInterval(() => {
+                    if (adTimeLeft > 0) {
+                        adTimeLeft--;
+                        countdownEl.textContent = adTimeLeft;
+                        const progress = ((videoAd.duration - adTimeLeft) / videoAd.duration) * 100;
+                        adProgressEl.style.width = `${progress}%`;
+                        
+                        if (adTimeLeft <= 0) {
+                            this.completeAd(true, resolve, earnings);
+                        }
+                    }
+                }, 1000);
+                
+                // 跳过按钮
+                skipBtn.addEventListener('click', () => {
+                    if (skipTimeLeft > 0) {
+                        return; // 还不能跳过
+                    }
+                    this.completeAd(false, resolve, earnings);
+                });
+                
+                // 完成按钮
+                completeBtn.addEventListener('click', () => {
+                    this.completeAd(true, resolve, earnings);
+                });
+                
+                this.videoPlayer = videoPlayer;
+                this.skipTimerInterval = skipTimerInterval;
+            }
+            
+            // 使用备用视频
+            useBackupVideo(videoPlayer, loadingEl) {
+                const backupVideo = CONFIG.backupVideos[Math.floor(Math.random() * CONFIG.backupVideos.length)];
+                videoPlayer.src = backupVideo;
+                loadingEl.innerHTML = `
+                    <div style="font-size: 30px; margin-bottom: 10px;">🔄</div>
+                    <div>加载备用视频...</div>
+                `;
+                
+                videoPlayer.load();
+            }
+            
+            // 完成广告
+            completeAd(completed, resolve, earnings) {
+                // 清理所有计时器
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                
+                if (this.skipTimerInterval) {
+                    clearInterval(this.skipTimerInterval);
+                    this.skipTimerInterval = null;
+                }
+                
+                // 暂停视频
+                if (this.videoPlayer) {
+                    this.videoPlayer.pause();
+                    this.videoPlayer = null;
+                }
+                
+                // 移除广告层
                 if (this.adOverlay && this.adOverlay.parentNode) {
                     document.body.removeChild(this.adOverlay);
                     this.adOverlay = null;
                 }
                 
+                document.body.style.overflow = ''; // 恢复滚动
+                
+                // 返回结果
                 if (completed) {
                     resolve({
                         success: true,
-                        earnings: this.currentEarnings,
+                        earnings: earnings,
                         currency: 'USD',
-                        message: '广告完成观看',
+                        message: '视频广告观看完成',
                         completed: true
                     });
                 } else {
@@ -325,6 +562,20 @@
                 }
             }
             
+            // 获取随机视频广告
+            getRandomVideoAd() {
+                const randomIndex = Math.floor(Math.random() * CONFIG.videoAds.length);
+                return CONFIG.videoAds[randomIndex];
+            }
+            
+            // 格式化时间显示
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // 计算动态收益
             calculateDynamicEarnings(adSlotId) {
                 const base = CONFIG.baseEarnings;
                 const randomFactor = 0.8 + Math.random() * 0.4;
@@ -345,7 +596,7 @@
         }
         
         // ========== 游戏逻辑 ==========
-        const adSystem = new LocalAdSystem();
+        const videoAdSystem = new VideoAdSystem();
         
         // 冷却计时器
         setInterval(() => {
@@ -379,12 +630,12 @@
             
             try {
                 btn.disabled = true;
-                btn.innerHTML = '⏳ 加载广告...';
-                statusEl.innerHTML = '⏳ 准备广告内容...';
+                btn.innerHTML = '⏳ 加载视频广告...';
+                statusEl.innerHTML = '⏳ 准备视频内容...';
                 statusEl.style.color = '#2196F3';
                 
-                console.log(`📡 请求广告位 ${adIndex}`);
-                const result = await adSystem.showAd(adIndex);
+                console.log(`📡 请求视频广告位 ${adIndex}`);
+                const result = await videoAdSystem.showAd(adIndex);
                 
                 if (result.success && result.completed) {
                     gameData.impressions++;
@@ -402,11 +653,11 @@
                     
                     updateStats();
                     
-                    statusEl.innerHTML = `✅ 完成 +$${result.earnings.toFixed(2)} 收益！`;
+                    statusEl.innerHTML = `✅ 视频观看完成 +$${result.earnings.toFixed(2)} 收益！`;
                     statusEl.style.color = '#4CAF50';
                     statusEl.style.fontWeight = 'bold';
                     
-                    console.log(`💰 广告收益: $${result.earnings.toFixed(2)}`);
+                    console.log(`💰 视频广告收益: $${result.earnings.toFixed(2)}`);
                     
                 } else if (result.success && !result.completed) {
                     statusEl.innerHTML = `⏭️ ${result.message}`;
@@ -418,7 +669,7 @@
                 
             } catch (error) {
                 console.error('广告异常:', error);
-                statusEl.innerHTML = '❌ 广告加载失败';
+                statusEl.innerHTML = '❌ 视频广告加载失败';
                 statusEl.style.color = '#f44336';
             } finally {
                 setTimeout(() => {
@@ -450,7 +701,7 @@
                     statusEl.innerHTML = '✅ 准备就绪';
                     statusEl.style.color = '#4CAF50';
                     btn.disabled = false;
-                    btn.innerHTML = '🎬 观看广告赚收益';
+                    btn.innerHTML = '🎬 观看视频广告';
                 }
             }
         }
@@ -524,14 +775,15 @@
         
         // 页面加载
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎮 修复版游戏加载');
+            console.log('🎬 视频广告游戏加载');
             console.log('👤 开发者: youmeng00000');
             console.log('🌐 网站: https://youmeng00000.github.io/');
+            console.log('📺 特性: 真实视频广告系统');
             
             loadGameData();
             updateCooldownDisplay();
             
-            console.log('✅ 修复版游戏就绪 - 无错误运行');
+            console.log('✅ 视频广告游戏就绪 - 点击按钮观看真实视频');
         });
         
         // 调试功能
@@ -572,7 +824,7 @@
             const clickRate = gameData.impressions > 0 ? 
                 ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0;
             
-            alert(`💰 收益详情：
+            alert(`💰 视频广告收益详情：
             
 累计展示: ${gameData.impressions} 次
 累计点击: ${gameData.clicks} 次
@@ -586,6 +838,12 @@
 1号位: $${gameData.adEarnings[0].toFixed(2)}
 2号位: $${gameData.adEarnings[1].toFixed(2)}
 3号位: $${gameData.adEarnings[2].toFixed(2)}
+
+🎬 视频广告特性:
+- 真实MP4视频播放
+- 视频控制功能
+- 10-18秒广告时长
+- 多种广告类别
             `);
         };
     </script>
