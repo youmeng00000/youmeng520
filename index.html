@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广告收益游戏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .title { 
+            color: white; text-align: center; margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3); font-size: 28px;
+        }
+        .squares-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .square {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .ad-btn {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 0;
+            width: 100%;
+        }
+        .ad-btn:disabled { background: #cccccc; cursor: not-allowed; }
+        .ad-status {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 10px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stats-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">💰 广告收益游戏</h1>
+        
+        <div class="squares-container">
+            <div class="square">
+                <div><h3>广告位 1</h3><p>观看广告赚取收益</p>
+                    <div class="ad-status" id="status1">✅ 准备就绪</div>
+                    <div style="color:#666;font-size:14px;">收益: $<span id="earnings1">0.00</span></div>
+                </div>
+                <button class="ad-btn" onclick="showAd(1)" id="btn1">🎬 观看广告赚 $0.35</button>
+            </div>
+            <div class="square">
+                <div><h3>广告位 2</h3><p>观看广告赚取收益</p>
+                    <div class="ad-status" id="status2">✅ 准备就绪</div>
+                    <div style="color:#666;font-size:14px;">收益: $<span id="earnings2">0.00</span></div>
+                </div>
+                <button class="ad-btn" onclick="showAd(2)" id="btn2">🎬 观看广告赚 $0.35</button>
+            </div>
+            <div class="square">
+                <div><h3>广告位 3</h3><p>观看广告赚取收益</p>
+                    <div class="ad-status" id="status3">✅ 准备就绪</div>
+                    <div style="color:#666;font-size:14px;">收益: $<span id="earnings3">0.00</span></div>
+                </div>
+                <button class="ad-btn" onclick="showAd(3)" id="btn3">🎬 观看广告赚 $0.35</button>
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <h2 style="text-align:center;color:#333;margin-bottom:20px;">📊 收益统计</h2>
+            <div class="stats-grid">
+                <div class="stat-item"><div style="color:#666;font-size:14px;">广告展示</div>
+                    <div style="font-size:24px;font-weight:bold;" id="impressions">0</div></div>
+                <div class="stat-item"><div style="color:#666;font-size:14px;">今日收益</div>
+                    <div style="font-size:24px;font-weight:bold;" id="todayEarnings">$0.00</div></div>
+                <div class="stat-item"><div style="color:#666;font-size:14px;">累计收益</div>
+                    <div style="font-size:24px;font-weight:bold;" id="totalEarnings">$0.00</div></div>
+                <div class="stat-item"><div style="color:#666;font-size:14px;">点击率</div>
+                    <div style="font-size:24px;font-weight:bold;" id="clickRate">0%</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 配置 ==========
+        const CONFIG = {
+            unityGameId: '6028834',
+            adUnits: { rewarded1: 'youmeng1', rewarded2: 'youmeng2', rewarded3: 'youmeng3' },
+            testMode: true,
+            adCooldown: 30,
+            baseEarnings: 0.35
+        };
+        
+        // ========== 游戏数据 ==========
+        let gameData = {
+            impressions: 0, clicks: 0, todayEarnings: 0, totalEarnings: 0,
+            adCooldowns: [0, 0, 0], adEarnings: [0, 0, 0]
+        };
+        
+        // ========== Unity Ads 管理器 ==========
+        class UnityAdManager {
+            constructor() { this.initialized = false; this.sdkAvailable = false; this.init(); }
+            
+            init() {
+                // 尝试加载Unity SDK
+                this.loadSDK().then(success => {
+                    this.sdkAvailable = success;
+                    if (success && typeof unityads !== 'undefined') {
+                        unityads.init(CONFIG.unityGameId, {
+                            testMode: CONFIG.testMode,
+                            onInitialized: () => {
+                                console.log('✅ Unity Ads初始化成功');
+                                this.initialized = true;
+                            },
+                            onFailed: () => {
+                                console.log('⚠️ Unity Ads初始化失败，使用模拟');
+                                this.sdkAvailable = false;
+                                this.initialized = true;
+                            }
+                        });
+                    } else {
+                        console.log('🔌 使用模拟模式');
+                        this.sdkAvailable = false;
+                        this.initialized = true;
+                    }
+                });
+            }
+            
+            async loadSDK() {
+                return new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.unityads.unity3d.com/unity-ads-sdk.js';
+                    script.async = true;
+                    script.onload = () => resolve(true);
+                    script.onerror = () => resolve(false);
+                    document.head.appendChild(script);
+                });
+            }
+            
+            showRewardedAd(adUnitId) {
+                return new Promise((resolve) => {
+                    if (!this.sdkAvailable || typeof unityads === 'undefined') {
+                        console.log('🎬 使用模拟广告');
+                        setTimeout(() => {
+                            resolve({ success: true, earnings: CONFIG.baseEarnings, currency: 'USD' });
+                        }, 1500);
+                        return;
+                    }
+                    
+                    unityads.show(adUnitId, {
+                        onClosed: (result) => {
+                            if (result && result.completed) {
+                                resolve({ success: true, earnings: CONFIG.baseEarnings, currency: 'USD', isRealAd: true });
+                            } else {
+                                resolve({ success: false, message: '广告未完成' });
+                            }
+                        },
+                        onFailed: () => {
+                            setTimeout(() => {
+                                resolve({ success: true, earnings: CONFIG.baseEarnings, currency: 'USD' });
+                            }, 1500);
+                        }
+                    });
+                });
+            }
+        }
+        
+        // ========== 游戏逻辑 ==========
+        const unityAdManager = new UnityAdManager();
+        
+        setInterval(() => {
+            if (gameData.adCooldowns && Array.isArray(gameData.adCooldowns)) {
+                gameData.adCooldowns = gameData.adCooldowns.map(cd => cd > 0 ? cd - 1 : 0);
+                updateCooldownDisplay();
+            }
+        }, 1000);
+        
+        async function showAd(adIndex) {
+            const adId = adIndex - 1;
+            if (gameData.adCooldowns[adId] > 0) {
+                alert(`广告冷却中，请等待 ${gameData.adCooldowns[adId]} 秒`);
+                return;
+            }
+            
+            const btn = document.getElementById(`btn${adIndex}`);
+            const statusEl = document.getElementById(`status${adIndex}`);
+            const originalText = btn.innerHTML;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ 广告加载中...';
+                statusEl.innerHTML = '⏳ 广告加载中...';
+                statusEl.style.color = '#2196F3';
+                
+                let adUnitId = CONFIG.adUnits[`rewarded${adIndex}`] || CONFIG.adUnits.rewarded1;
+                const result = await unityAdManager.showRewardedAd(adUnitId);
+                
+                if (result.success) {
+                    gameData.impressions++;
+                    gameData.clicks++;
+                    gameData.todayEarnings += result.earnings;
+                    gameData.totalEarnings += result.earnings;
+                    gameData.adEarnings[adId] += result.earnings;
+                    gameData.adCooldowns[adId] = CONFIG.adCooldown;
+                    
+                    updateStats();
+                    statusEl.innerHTML = `✅ +$${result.earnings} 收益！`;
+                    statusEl.style.color = '#4CAF50';
+                } else {
+                    statusEl.innerHTML = `❌ ${result.message}`;
+                    statusEl.style.color = '#f44336';
+                }
+            } catch (error) {
+                statusEl.innerHTML = '❌ 广告加载失败';
+                statusEl.style.color = '#f44336';
+            } finally {
+                setTimeout(() => {
+                    if (gameData.adCooldowns[adId] === 0) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }
+                }, 1000);
+            }
+        }
+        
+        function updateCooldownDisplay() {
+            gameData.adCooldowns.forEach((cd, index) => {
+                const statusEl = document.getElementById(`status${index + 1}`);
+                const btn = document.getElementById(`btn${index + 1}`);
+                if (!statusEl || !btn) return;
+                
+                if (cd > 0) {
+                    statusEl.innerHTML = `⏳ 冷却: ${cd}秒`;
+                    statusEl.style.color = '#ff9800';
+                    btn.disabled = true;
+                    btn.innerHTML = `⏳ 冷却中 (${cd}s)`;
+                } else {
+                    statusEl.innerHTML = '✅ 准备就绪';
+                    statusEl.style.color = '#4CAF50';
+                    btn.disabled = false;
+                    btn.innerHTML = '🎬 观看广告赚 $0.35';
+                }
+            });
+        }
+        
+        function updateStats() {
+            document.getElementById('impressions').textContent = gameData.impressions;
+            document.getElementById('todayEarnings').textContent = '$' + gameData.todayEarnings.toFixed(2);
+            document.getElementById('totalEarnings').textContent = '$' + gameData.totalEarnings.toFixed(2);
+            
+            const clickRate = gameData.impressions > 0 ? 
+                ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0;
+            document.getElementById('clickRate').textContent = clickRate + '%';
+            
+            gameData.adEarnings.forEach((earning, index) => {
+                const el = document.getElementById(`earnings${index + 1}`);
+                if (el) el.textContent = earning.toFixed(2);
+            });
+            
+            localStorage.setItem('adGameData', JSON.stringify(gameData));
+        }
+        
+        function loadGameData() {
+            try {
+                const saved = localStorage.getItem('adGameData');
+                if (saved) {
+                    gameData = JSON.parse(saved);
+                    updateStats();
+                }
+            } catch (error) {
+                console.log('加载失败:', error);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎮 游戏加载中...');
+            loadGameData();
+            updateCooldownDisplay();
+            console.log('✅ 游戏就绪');
+        });
+        
+        window.resetGame = function() {
+            if (confirm('重置所有数据？')) {
+                gameData = { impressions:0, clicks:0, todayEarnings:0, totalEarnings:0, adCooldowns:[0,0,0], adEarnings:[0,0,0] };
+                localStorage.removeItem('adGameData');
+                updateStats();
+                updateCooldownDisplay();
+                alert('已重置');
+            }
+        };
+    </script>
+</body>
+</html>
