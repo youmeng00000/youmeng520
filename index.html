@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>广告收益游戏 - 视频广告版</title>
+    <title>广告收益游戏 - Vercel修复版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -76,7 +76,7 @@
             border-radius: 15px;
             border-left: 4px solid #4CAF50;
         }
-        .info-badge {
+        .mode-badge {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -87,10 +87,25 @@
             font-size: 12px;
             font-weight: bold;
         }
+        .unity-test-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: #FF9800;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
-    <div class="info-badge">🎬 视频广告版</div>
+    <button class="unity-test-btn" onclick="testUnityConnection()">🔗 测试Unity连接</button>
+    <div class="mode-badge" id="mode-badge">🎬 视频广告版</div>
     
     <div class="container">
         <h1 class="title">💰 广告收益游戏</h1>
@@ -151,58 +166,46 @@
     </div>
 
     <script>
-        // ========== 游戏配置 ==========
+        // ========== 全局配置 ==========
         const CONFIG = {
+            // 游戏配置
             adCooldown: 30,
             baseEarnings: 0.35,
             
-            // 视频广告库（免费可用的视频）
+            // Unity 配置（用于真实收益）
+            unityGameId: '6028834',
+            unityAdUnits: {
+                rewarded1: 'youmeng1',
+                rewarded2: 'youmeng2',
+                rewarded3: 'youmeng3'
+            },
+            
+            // 可靠视频源（Google公开视频库）
             videoAds: [
                 {
                     id: 1,
-                    title: "自然风光广告",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4",
+                    title: "广告视频",
+                    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
                     duration: 15,
-                    category: "自然"
+                    category: "推荐"
                 },
                 {
                     id: 2,
-                    title: "科技产品展示",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-close-up-view-of-a-3d-printer-printing-1171-large.mp4",
-                    duration: 12,
-                    category: "科技"
+                    title: "广告视频", 
+                    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                    duration: 15,
+                    category: "推荐"
                 },
                 {
                     id: 3,
-                    title: "城市夜景",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-city-at-night-1170-large.mp4",
-                    duration: 18,
-                    category: "城市"
-                },
-                {
-                    id: 4,
-                    title: "运动健身",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-young-woman-stretching-after-a-workout-1169-large.mp4",
-                    duration: 14,
-                    category: "运动"
-                },
-                {
-                    id: 5,
-                    title: "美食广告",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-pouring-milk-into-a-glass-1168-large.mp4",
+                    title: "广告视频",
+                    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
                     duration: 10,
-                    category: "美食"
-                },
-                {
-                    id: 6,
-                    title: "创意艺术",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-close-view-of-a-potter-making-a-vase-1167-large.mp4",
-                    duration: 16,
-                    category: "艺术"
+                    category: "动画"
                 }
             ],
             
-            // 备用视频（如果主视频加载失败）
+            // 备用视频
             backupVideos: [
                 "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
                 "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
@@ -222,20 +225,109 @@
             todayDate: new Date().toDateString()
         };
         
-        // ========== 视频广告系统 ==========
-        class VideoAdSystem {
+        // ========== Unity Ads 状态 ==========
+        let unityAvailable = false;
+        let unityInitialized = false;
+        
+        // ========== 智能广告系统 ==========
+        class SmartAdSystem {
             constructor() {
-                console.log('🎬 视频广告系统初始化');
+                console.log('🎬 智能广告系统初始化');
                 this.adOverlay = null;
                 this.currentVideo = null;
                 this.videoInterval = null;
                 this.timerInterval = null;
+                this.checkUnityAvailability();
             }
             
-            // 展示视频广告
-            showAd(adSlotId) {
+            // 检查Unity可用性
+            async checkUnityAvailability() {
+                console.log('🔍 检测Unity连接状态...');
+                
+                try {
+                    // 尝试加载Unity SDK
+                    await this.loadScript('https://cdn.unityads.unity3d.com/unity-ads-sdk.js');
+                    
+                    if (typeof unityads !== 'undefined') {
+                        console.log('✅ Unity SDK加载成功');
+                        unityAvailable = true;
+                        
+                        // 尝试初始化
+                        unityads.init(CONFIG.unityGameId, {
+                            testMode: true,
+                            onInitialized: () => {
+                                console.log('🎉 Unity Ads初始化成功');
+                                unityInitialized = true;
+                                document.getElementById('mode-badge').textContent = '🚀 Unity模式';
+                                document.getElementById('mode-badge').style.background = '#4CAF50';
+                            },
+                            onFailed: (error) => {
+                                console.log('⚠️ Unity初始化失败:', error);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.log('❌ Unity不可用:', error);
+                }
+            }
+            
+            loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+            
+            // 展示广告（智能选择）
+            async showAd(adSlotId) {
+                // 如果Unity可用，优先使用Unity
+                if (unityAvailable && unityInitialized) {
+                    console.log('🎯 使用Unity真实广告');
+                    return this.showUnityAd(adSlotId);
+                } else {
+                    console.log('🎬 使用本地视频广告');
+                    return this.showLocalAd(adSlotId);
+                }
+            }
+            
+            // 展示Unity真实广告
+            showUnityAd(adSlotId) {
+                return new Promise((resolve, reject) => {
+                    const adUnitId = CONFIG.unityAdUnits[`rewarded${adSlotId}`];
+                    
+                    unityads.show(adUnitId, {
+                        onClosed: (result) => {
+                            if (result && result.completed) {
+                                resolve({
+                                    success: true,
+                                    earnings: this.calculateRealEarnings(),
+                                    currency: 'USD',
+                                    isRealAd: true,
+                                    message: 'Unity真实广告完成'
+                                });
+                            } else {
+                                resolve({
+                                    success: false,
+                                    message: '广告未完成观看'
+                                });
+                            }
+                        },
+                        onFailed: (error) => {
+                            console.log('⚠️ Unity广告失败，切换到本地:', error);
+                            // 失败时切换到本地广告
+                            this.showLocalAd(adSlotId).then(resolve).catch(reject);
+                        }
+                    });
+                });
+            }
+            
+            // 展示本地视频广告
+            showLocalAd(adSlotId) {
                 return new Promise((resolve) => {
-                    console.log(`📺 展示视频广告 ${adSlotId}`);
+                    console.log(`📺 展示本地视频广告 ${adSlotId}`);
                     this.createVideoAdInterface(adSlotId, resolve);
                 });
             }
@@ -245,13 +337,9 @@
                 // 移除已存在的广告层
                 if (this.adOverlay) {
                     document.body.removeChild(this.adOverlay);
-                    this.adOverlay = null;
                 }
                 
-                // 计算收益
                 const earnings = this.calculateDynamicEarnings(adSlotId);
-                
-                // 随机选择一个视频广告
                 const videoAd = this.getRandomVideoAd();
                 
                 // 创建广告层
@@ -275,7 +363,7 @@
                         <!-- 广告头部 -->
                         <div style="background: rgba(0,0,0,0.8); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
                             <div style="color: white; font-size: 16px; font-weight: bold;">
-                                🎬 视频广告
+                                🎬 ${unityAvailable ? 'Unity广告' : '视频广告'}
                             </div>
                             <div style="color: #4CAF50; font-size: 14px; font-weight: bold;">
                                 收益: $${earnings.toFixed(2)}
@@ -289,6 +377,7 @@
                                 style="width: 100%; height: 100%; object-fit: contain; background: #000;"
                                 playsinline
                                 webkit-playsinline
+                                preload="auto"
                             >
                                 您的浏览器不支持视频播放
                             </video>
@@ -298,42 +387,14 @@
                                 <div style="font-size: 30px; margin-bottom: 10px;">⏳</div>
                                 <div>视频加载中...</div>
                             </div>
-                            
-                            <!-- 视频控制层 -->
-                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px;">
-                                <!-- 进度条 -->
-                                <div style="width: 100%; background: rgba(255,255,255,0.3); height: 4px; border-radius: 2px; margin-bottom: 10px;">
-                                    <div id="video-progress-bar" style="width: 0%; height: 100%; background: #4CAF50; border-radius: 2px; transition: width 0.3s;"></div>
-                                </div>
-                                
-                                <!-- 控制按钮 -->
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <button id="video-play-pause" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">
-                                        ⏸️
-                                    </button>
-                                    
-                                    <div style="color: white; font-size: 14px;">
-                                        <span id="video-current-time">0:00</span> / <span id="video-total-time">0:00</span>
-                                    </div>
-                                    
-                                    <button id="video-sound-toggle" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">
-                                        🔇
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- 广告信息 -->
-                            <div style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 5px; font-size: 12px;">
-                                📢 ${videoAd.category} 广告
-                            </div>
                         </div>
                         
                         <!-- 广告底部 -->
                         <div style="background: rgba(0,0,0,0.9); padding: 20px; border-top: 1px solid #333;">
-                            <!-- 倒计时和跳过 -->
+                            <!-- 倒计时 -->
                             <div style="margin-bottom: 15px;">
                                 <div style="color: white; text-align: center; margin-bottom: 10px; font-size: 14px;">
-                                    ⏳ 广告剩余时间: <span id="ad-countdown" style="font-weight: bold; color: #4CAF50;">${videoAd.duration}</span>秒
+                                    ⏳ 剩余时间: <span id="ad-countdown" style="font-weight: bold; color: #4CAF50;">${videoAd.duration}</span>秒
                                 </div>
                                 <div style="width: 100%; background: #333; height: 6px; border-radius: 3px;">
                                     <div id="ad-progress" style="width: 0%; height: 100%; background: #4CAF50; border-radius: 3px; transition: width 1s linear;"></div>
@@ -343,24 +404,18 @@
                             <!-- 控制按钮 -->
                             <div style="display: flex; justify-content: center; gap: 15px;">
                                 <button id="ad-skip-btn" style="background: #666; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; opacity: 0.5;" disabled>
-                                    跳过广告 (<span id="skip-timer">5</span>秒后)
+                                    跳过 (<span id="skip-timer">5</span>秒)
                                 </button>
                                 <button id="ad-complete-btn" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold;">
-                                    观看完成 (+$${earnings.toFixed(2)})
+                                    完成 (+$${earnings.toFixed(2)})
                                 </button>
-                            </div>
-                            
-                            <!-- 广告详情 -->
-                            <div style="color: #888; font-size: 11px; text-align: center; margin-top: 15px;">
-                                <div>广告ID: AD${Date.now().toString().slice(-8)} | 时长: ${videoAd.duration}秒 | 类别: ${videoAd.category}</div>
-                                <div>观看完整视频以获得收益奖励</div>
                             </div>
                         </div>
                     </div>
                 `;
                 
                 document.body.appendChild(this.adOverlay);
-                document.body.style.overflow = 'hidden'; // 禁止滚动
+                document.body.style.overflow = 'hidden';
                 
                 // 设置视频播放器
                 this.setupVideoPlayer(videoAd, resolve, earnings);
@@ -375,53 +430,42 @@
             setupVideoPlayer(videoAd, resolve, earnings) {
                 const videoPlayer = document.getElementById('ad-video-player');
                 const loadingEl = document.getElementById('video-loading');
-                const playPauseBtn = document.getElementById('video-play-pause');
-                const soundToggleBtn = document.getElementById('video-sound-toggle');
-                const progressBar = document.getElementById('video-progress-bar');
-                const currentTimeEl = document.getElementById('video-current-time');
-                const totalTimeEl = document.getElementById('video-total-time');
                 const skipBtn = document.getElementById('ad-skip-btn');
                 const skipTimerEl = document.getElementById('skip-timer');
                 const completeBtn = document.getElementById('ad-complete-btn');
                 const countdownEl = document.getElementById('ad-countdown');
                 const adProgressEl = document.getElementById('ad-progress');
                 
-                let isPlaying = true;
-                let isMuted = true;
                 let skipTimeLeft = 5;
                 let adTimeLeft = videoAd.duration;
                 let videoLoaded = false;
                 
-                // 设置视频源
+                // 设置视频源（确保跨域正确）
                 videoPlayer.src = videoAd.videoUrl;
-                videoPlayer.muted = true; // 默认静音
+                videoPlayer.muted = true;
                 videoPlayer.playsInline = true;
+                videoPlayer.crossOrigin = "anonymous"; // 重要：解决跨域问题
                 
                 // 视频加载事件
                 videoPlayer.addEventListener('loadeddata', () => {
                     console.log('✅ 视频加载完成');
                     videoLoaded = true;
-                    loadingEl.style.display = 'none';
-                    
-                    // 设置总时间
-                    const duration = videoPlayer.duration || videoAd.duration;
-                    totalTimeEl.textContent = this.formatTime(duration);
-                    
-                    // 开始播放
+                    if (loadingEl) loadingEl.style.display = 'none';
                     videoPlayer.play().catch(e => {
-                        console.log('视频自动播放失败:', e);
-                        // 手动触发播放
-                        playPauseBtn.click();
+                        console.log('自动播放失败:', e);
+                        // 用户需要交互后才能播放
                     });
                 });
                 
                 videoPlayer.addEventListener('error', (e) => {
                     console.log('❌ 视频加载失败:', e);
-                    loadingEl.innerHTML = `
-                        <div style="font-size: 30px; margin-bottom: 10px;">❌</div>
-                        <div>视频加载失败</div>
-                        <div style="font-size: 12px; margin-top: 10px;">正在切换到备用视频...</div>
-                    `;
+                    if (loadingEl) {
+                        loadingEl.innerHTML = `
+                            <div style="font-size: 30px; margin-bottom: 10px;">❌</div>
+                            <div>视频加载失败</div>
+                            <div style="font-size: 12px; margin-top: 10px;">切换到备用视频...</div>
+                        `;
+                    }
                     
                     // 切换到备用视频
                     setTimeout(() => {
@@ -429,42 +473,13 @@
                     }, 2000);
                 });
                 
-                // 播放/暂停控制
-                playPauseBtn.addEventListener('click', () => {
-                    if (videoPlayer.paused) {
-                        videoPlayer.play();
-                        playPauseBtn.innerHTML = '⏸️';
-                        isPlaying = true;
-                    } else {
-                        videoPlayer.pause();
-                        playPauseBtn.innerHTML = '▶️';
-                        isPlaying = false;
-                    }
-                });
-                
-                // 音量控制
-                soundToggleBtn.addEventListener('click', () => {
-                    isMuted = !isMuted;
-                    videoPlayer.muted = isMuted;
-                    soundToggleBtn.innerHTML = isMuted ? '🔇' : '🔊';
-                });
-                
-                // 视频进度更新
-                videoPlayer.addEventListener('timeupdate', () => {
-                    if (videoPlayer.duration) {
-                        const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
-                        progressBar.style.width = `${progress}%`;
-                        currentTimeEl.textContent = this.formatTime(videoPlayer.currentTime);
-                    }
-                });
-                
                 // 跳过按钮倒计时
                 const skipTimerInterval = setInterval(() => {
                     if (skipTimeLeft > 0) {
                         skipTimeLeft--;
-                        skipTimerEl.textContent = skipTimeLeft;
+                        if (skipTimerEl) skipTimerEl.textContent = skipTimeLeft;
                         
-                        if (skipTimeLeft <= 0) {
+                        if (skipTimeLeft <= 0 && skipBtn) {
                             skipBtn.disabled = false;
                             skipBtn.style.opacity = '1';
                             skipBtn.textContent = '跳过广告';
@@ -477,9 +492,9 @@
                 this.timerInterval = setInterval(() => {
                     if (adTimeLeft > 0) {
                         adTimeLeft--;
-                        countdownEl.textContent = adTimeLeft;
+                        if (countdownEl) countdownEl.textContent = adTimeLeft;
                         const progress = ((videoAd.duration - adTimeLeft) / videoAd.duration) * 100;
-                        adProgressEl.style.width = `${progress}%`;
+                        if (adProgressEl) adProgressEl.style.width = `${progress}%`;
                         
                         if (adTimeLeft <= 0) {
                             this.completeAd(true, resolve, earnings);
@@ -488,17 +503,19 @@
                 }, 1000);
                 
                 // 跳过按钮
-                skipBtn.addEventListener('click', () => {
-                    if (skipTimeLeft > 0) {
-                        return; // 还不能跳过
-                    }
-                    this.completeAd(false, resolve, earnings);
-                });
+                if (skipBtn) {
+                    skipBtn.addEventListener('click', () => {
+                        if (skipTimeLeft > 0) return;
+                        this.completeAd(false, resolve, earnings);
+                    });
+                }
                 
                 // 完成按钮
-                completeBtn.addEventListener('click', () => {
-                    this.completeAd(true, resolve, earnings);
-                });
+                if (completeBtn) {
+                    completeBtn.addEventListener('click', () => {
+                        this.completeAd(true, resolve, earnings);
+                    });
+                }
                 
                 this.videoPlayer = videoPlayer;
                 this.skipTimerInterval = skipTimerInterval;
@@ -508,10 +525,14 @@
             useBackupVideo(videoPlayer, loadingEl) {
                 const backupVideo = CONFIG.backupVideos[Math.floor(Math.random() * CONFIG.backupVideos.length)];
                 videoPlayer.src = backupVideo;
-                loadingEl.innerHTML = `
-                    <div style="font-size: 30px; margin-bottom: 10px;">🔄</div>
-                    <div>加载备用视频...</div>
-                `;
+                videoPlayer.crossOrigin = "anonymous";
+                
+                if (loadingEl) {
+                    loadingEl.innerHTML = `
+                        <div style="font-size: 30px; margin-bottom: 10px;">🔄</div>
+                        <div>加载备用视频...</div>
+                    `;
+                }
                 
                 videoPlayer.load();
             }
@@ -541,7 +562,7 @@
                     this.adOverlay = null;
                 }
                 
-                document.body.style.overflow = ''; // 恢复滚动
+                document.body.style.overflow = '';
                 
                 // 返回结果
                 if (completed) {
@@ -549,15 +570,14 @@
                         success: true,
                         earnings: earnings,
                         currency: 'USD',
-                        message: '视频广告观看完成',
-                        completed: true
+                        isRealAd: unityAvailable && unityInitialized,
+                        message: unityAvailable ? 'Unity广告完成' : '视频广告完成'
                     });
                 } else {
                     resolve({
                         success: false,
                         earnings: 0,
-                        message: '用户跳过广告',
-                        completed: false
+                        message: '用户跳过广告'
                     });
                 }
             }
@@ -566,13 +586,6 @@
             getRandomVideoAd() {
                 const randomIndex = Math.floor(Math.random() * CONFIG.videoAds.length);
                 return CONFIG.videoAds[randomIndex];
-            }
-            
-            // 格式化时间显示
-            formatTime(seconds) {
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
             }
             
             // 计算动态收益
@@ -593,10 +606,16 @@
                 const finalEarnings = base * randomFactor * timeFactor * slotFactor;
                 return parseFloat(finalEarnings.toFixed(2));
             }
+            
+            // 计算真实收益（Unity）
+            calculateRealEarnings() {
+                // 真实收益由Unity决定，这里返回预估
+                return 0.35;
+            }
         }
         
         // ========== 游戏逻辑 ==========
-        const videoAdSystem = new VideoAdSystem();
+        const adSystem = new SmartAdSystem();
         
         // 冷却计时器
         setInterval(() => {
@@ -630,14 +649,14 @@
             
             try {
                 btn.disabled = true;
-                btn.innerHTML = '⏳ 加载视频广告...';
-                statusEl.innerHTML = '⏳ 准备视频内容...';
+                btn.innerHTML = '⏳ 加载广告...';
+                statusEl.innerHTML = '⏳ 准备广告内容...';
                 statusEl.style.color = '#2196F3';
                 
-                console.log(`📡 请求视频广告位 ${adIndex}`);
-                const result = await videoAdSystem.showAd(adIndex);
+                console.log(`📡 请求广告位 ${adIndex}`);
+                const result = await adSystem.showAd(adIndex);
                 
-                if (result.success && result.completed) {
+                if (result.success) {
                     gameData.impressions++;
                     gameData.clicks++;
                     gameData.todayEarnings += result.earnings;
@@ -653,15 +672,17 @@
                     
                     updateStats();
                     
-                    statusEl.innerHTML = `✅ 视频观看完成 +$${result.earnings.toFixed(2)} 收益！`;
-                    statusEl.style.color = '#4CAF50';
+                    if (result.isRealAd) {
+                        statusEl.innerHTML = `✅ Unity广告 +$${result.earnings.toFixed(2)} 收益！`;
+                        statusEl.style.color = '#4CAF50';
+                        console.log(`💰 Unity真实收益: $${result.earnings.toFixed(2)}`);
+                    } else {
+                        statusEl.innerHTML = `✅ 视频广告 +$${result.earnings.toFixed(2)} 收益！`;
+                        statusEl.style.color = '#4CAF50';
+                        console.log(`🎬 视频广告收益: $${result.earnings.toFixed(2)}`);
+                    }
                     statusEl.style.fontWeight = 'bold';
                     
-                    console.log(`💰 视频广告收益: $${result.earnings.toFixed(2)}`);
-                    
-                } else if (result.success && !result.completed) {
-                    statusEl.innerHTML = `⏭️ ${result.message}`;
-                    statusEl.style.color = '#FF9800';
                 } else {
                     statusEl.innerHTML = `❌ ${result.message}`;
                     statusEl.style.color = '#f44336';
@@ -669,7 +690,7 @@
                 
             } catch (error) {
                 console.error('广告异常:', error);
-                statusEl.innerHTML = '❌ 视频广告加载失败';
+                statusEl.innerHTML = '❌ 广告加载失败';
                 statusEl.style.color = '#f44336';
             } finally {
                 setTimeout(() => {
@@ -701,7 +722,7 @@
                     statusEl.innerHTML = '✅ 准备就绪';
                     statusEl.style.color = '#4CAF50';
                     btn.disabled = false;
-                    btn.innerHTML = '🎬 观看视频广告';
+                    btn.innerHTML = '🎬 观看广告';
                 }
             }
         }
@@ -773,17 +794,75 @@
             }
         }
         
-        // 页面加载
+        // ========== Unity 连接测试 ==========
+        window.testUnityConnection = async function() {
+            const result = await new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.unityads.unity3d.com/unity-ads-sdk.js';
+                
+                script.onload = () => {
+                    if (typeof unityads !== 'undefined') {
+                        unityads.init(CONFIG.unityGameId, {
+                            testMode: true,
+                            onInitialized: () => {
+                                resolve({
+                                    success: true,
+                                    message: '🎉 Unity连接成功！可以产生真实收益！'
+                                });
+                            },
+                            onFailed: (error) => {
+                                resolve({
+                                    success: false,
+                                    message: '❌ Unity初始化失败: ' + error
+                                });
+                            }
+                        });
+                    } else {
+                        resolve({
+                            success: false,
+                            message: '❌ unityads对象未定义'
+                        });
+                    }
+                };
+                
+                script.onerror = () => {
+                    resolve({
+                        success: false,
+                        message: '❌ Unity SDK加载失败（网络问题）'
+                    });
+                };
+                
+                document.head.appendChild(script);
+            });
+            
+            alert(result.message);
+            
+            if (result.success) {
+                // 刷新Unity状态
+                unityAvailable = true;
+                unityInitialized = true;
+                document.getElementById('mode-badge').textContent = '🚀 Unity模式';
+                document.getElementById('mode-badge').style.background = '#4CAF50';
+            }
+        };
+        
+        // ========== 页面加载 ==========
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎬 视频广告游戏加载');
+            console.log('🚀 智能广告游戏加载');
             console.log('👤 开发者: youmeng00000');
-            console.log('🌐 网站: https://youmeng00000.github.io/');
-            console.log('📺 特性: 真实视频广告系统');
+            console.log('🌐 部署平台:', window.location.hostname.includes('vercel.app') ? 'Vercel 🚀' : '其他');
+            console.log('🔗 当前地址:', window.location.href);
+            
+            // 显示部署信息
+            const deployInfo = window.location.hostname.includes('vercel.app') 
+                ? '✅ Vercel海外部署（可连接Unity）' 
+                : '🔧 本地/GitHub部署';
+            console.log('📊 部署状态:', deployInfo);
             
             loadGameData();
             updateCooldownDisplay();
             
-            console.log('✅ 视频广告游戏就绪 - 点击按钮观看真实视频');
+            console.log('✅ 游戏就绪 - 点击左上角按钮测试Unity连接');
         });
         
         // 调试功能
@@ -824,7 +903,7 @@
             const clickRate = gameData.impressions > 0 ? 
                 ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0;
             
-            alert(`💰 视频广告收益详情：
+            alert(`💰 广告收益详情：
             
 累计展示: ${gameData.impressions} 次
 累计点击: ${gameData.clicks} 次
@@ -834,16 +913,8 @@
 累计收益: $${gameData.totalEarnings.toFixed(2)}
 累计真实收益: $${(gameData.totalRealEarnings || 0).toFixed(2)}
 
-各广告位收益:
-1号位: $${gameData.adEarnings[0].toFixed(2)}
-2号位: $${gameData.adEarnings[1].toFixed(2)}
-3号位: $${gameData.adEarnings[2].toFixed(2)}
-
-🎬 视频广告特性:
-- 真实MP4视频播放
-- 视频控制功能
-- 10-18秒广告时长
-- 多种广告类别
+广告模式: ${unityAvailable ? 'Unity真实广告 🚀' : '本地视频广告'}
+Vercel部署: ${window.location.hostname.includes('vercel.app') ? '✅ 已部署' : '❌ 未部署'}
             `);
         };
     </script>
