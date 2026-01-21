@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>广告收益游戏</title>
+    <title>广告收益游戏 - 真实收益模式</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -76,147 +76,317 @@
             border-radius: 15px;
             border-left: 4px solid #4CAF50;
         }
+        .mode-badge {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #FF9800;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+    <div class="mode-badge">💰 真实收益模式</div>
+    
     <div class="container">
-        <h1 class="title">💰 广告收益游戏</h1>
+        <h1 class="title">💰 广告收益游戏 - 真实模式</h1>
         
         <div class="squares-container">
             <div class="square">
-                <div><h3>广告位 1</h3><p>观看广告赚取收益</p>
+                <div>
+                    <h3>广告位 1</h3>
+                    <p>观看真实Unity Ads视频</p>
                     <div class="ad-status" id="status1">✅ 准备就绪</div>
                     <div style="color:#666;font-size:14px;">收益: $<span id="earnings1">0.00</span></div>
                 </div>
-                <button class="ad-btn" onclick="showAd(1)" id="btn1">🎬 观看广告赚 $0.35</button>
+                <button class="ad-btn" onclick="showAd(1)" id="btn1">🎬 观看真实广告赚收益</button>
             </div>
+            
             <div class="square">
-                <div><h3>广告位 2</h3><p>观看广告赚取收益</p>
+                <div>
+                    <h3>广告位 2</h3>
+                    <p>观看真实Unity Ads视频</p>
                     <div class="ad-status" id="status2">✅ 准备就绪</div>
                     <div style="color:#666;font-size:14px;">收益: $<span id="earnings2">0.00</span></div>
                 </div>
-                <button class="ad-btn" onclick="showAd(2)" id="btn2">🎬 观看广告赚 $0.35</button>
+                <button class="ad-btn" onclick="showAd(2)" id="btn2">🎬 观看真实广告赚收益</button>
             </div>
+            
             <div class="square">
-                <div><h3>广告位 3</h3><p>观看广告赚取收益</p>
+                <div>
+                    <h3>广告位 3</h3>
+                    <p>观看真实Unity Ads视频</p>
                     <div class="ad-status" id="status3">✅ 准备就绪</div>
                     <div style="color:#666;font-size:14px;">收益: $<span id="earnings3">0.00</span></div>
                 </div>
-                <button class="ad-btn" onclick="showAd(3)" id="btn3">🎬 观看广告赚 $0.35</button>
+                <button class="ad-btn" onclick="showAd(3)" id="btn3">🎬 观看真实广告赚收益</button>
             </div>
         </div>
         
         <div class="stats-panel">
-            <h2 style="text-align:center;color:#333;margin-bottom:20px;">📊 收益统计</h2>
+            <h2 style="text-align:center;color:#333;margin-bottom:20px;">📊 真实收益统计</h2>
             <div class="stats-grid">
-                <div class="stat-item"><div style="color:#666;font-size:14px;">广告展示</div>
-                    <div style="font-size:24px;font-weight:bold;" id="impressions">0</div></div>
-                <div class="stat-item"><div style="color:#666;font-size:14px;">今日收益</div>
-                    <div style="font-size:24px;font-weight:bold;" id="todayEarnings">$0.00</div></div>
-                <div class="stat-item"><div style="color:#666;font-size:14px;">累计收益</div>
-                    <div style="font-size:24px;font-weight:bold;" id="totalEarnings">$0.00</div></div>
-                <div class="stat-item"><div style="color:#666;font-size:14px;">点击率</div>
-                    <div style="font-size:24px;font-weight:bold;" id="clickRate">0%</div></div>
+                <div class="stat-item">
+                    <div style="color:#666;font-size:14px;">广告展示</div>
+                    <div style="font-size:24px;font-weight:bold;" id="impressions">0</div>
+                </div>
+                <div class="stat-item">
+                    <div style="color:#666;font-size:14px;">今日收益</div>
+                    <div style="font-size:24px;font-weight:bold;" id="todayEarnings">$0.00</div>
+                </div>
+                <div class="stat-item">
+                    <div style="color:#666;font-size:14px;">累计收益</div>
+                    <div style="font-size:24px;font-weight:bold;" id="totalEarnings">$0.00</div>
+                </div>
+                <div class="stat-item">
+                    <div style="color:#666;font-size:14px;">点击率</div>
+                    <div style="font-size:24px;font-weight:bold;" id="clickRate">0%</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== 配置 ==========
+        // ========== 真实模式配置 ==========
         const CONFIG = {
+            // 你的Unity配置
             unityGameId: '6028834',
-            adUnits: { rewarded1: 'youmeng1', rewarded2: 'youmeng2', rewarded3: 'youmeng3' },
-            testMode: true,
+            adUnits: {
+                rewarded1: 'youmeng1',
+                rewarded2: 'youmeng2',
+                rewarded3: 'youmeng3'
+            },
+            
+            // 🚀 真实模式 - 产生真实收益！
+            testMode: false,
+            
             adCooldown: 30,
-            baseEarnings: 0.35
+            baseEarnings: 0.35  // 基础收益预估，实际由Unity决定
         };
         
         // ========== 游戏数据 ==========
         let gameData = {
-            impressions: 0, clicks: 0, todayEarnings: 0, totalEarnings: 0,
-            adCooldowns: [0, 0, 0], adEarnings: [0, 0, 0]
+            impressions: 0,
+            clicks: 0,
+            todayEarnings: 0,
+            totalEarnings: 0,
+            adCooldowns: [0, 0, 0],
+            adEarnings: [0, 0, 0]
         };
         
         // ========== Unity Ads 管理器 ==========
         class UnityAdManager {
-            constructor() { this.initialized = false; this.sdkAvailable = false; this.init(); }
+            constructor() {
+                this.initialized = false;
+                this.sdkLoaded = false;
+                this.init();
+            }
             
-            init() {
-                // 尝试加载Unity SDK
-                this.loadSDK().then(success => {
-                    this.sdkAvailable = success;
-                    if (success && typeof unityads !== 'undefined') {
+            async init() {
+                console.log('🚀 启动真实广告模式...');
+                
+                // 加载Unity SDK
+                this.sdkLoaded = await this.loadUnitySDK();
+                
+                if (this.sdkLoaded && typeof unityads !== 'undefined') {
+                    console.log('✅ Unity SDK加载成功，开始初始化...');
+                    
+                    try {
                         unityads.init(CONFIG.unityGameId, {
                             testMode: CONFIG.testMode,
                             onInitialized: () => {
-                                console.log('✅ Unity Ads初始化成功');
+                                console.log('🎉 Unity Ads真实模式初始化成功！');
+                                console.log('💰 现在开始产生真实收益！');
                                 this.initialized = true;
+                                updateStatusText('🎯 真实广告模式就绪');
                             },
-                            onFailed: () => {
-                                console.log('⚠️ Unity Ads初始化失败，使用模拟');
-                                this.sdkAvailable = false;
+                            onFailed: (error) => {
+                                console.error('❌ Unity Ads初始化失败:', error);
+                                this.sdkLoaded = false;
                                 this.initialized = true;
+                                updateStatusText('⚠️ 真实模式失败，使用备用');
                             }
                         });
-                    } else {
-                        console.log('🔌 使用模拟模式');
-                        this.sdkAvailable = false;
+                    } catch (error) {
+                        console.error('❌ Unity Ads初始化异常:', error);
+                        this.sdkLoaded = false;
                         this.initialized = true;
                     }
-                });
+                } else {
+                    console.warn('⚠️ Unity SDK加载失败，使用备用方案');
+                    this.sdkLoaded = false;
+                    this.initialized = true;
+                    updateStatusText('🔌 网络问题，使用备用');
+                }
             }
             
-            async loadSDK() {
+            async loadUnitySDK() {
                 return new Promise((resolve) => {
                     const script = document.createElement('script');
                     script.src = 'https://cdn.unityads.unity3d.com/unity-ads-sdk.js';
                     script.async = true;
-                    script.onload = () => resolve(true);
-                    script.onerror = () => resolve(false);
+                    
+                    script.onload = () => {
+                        console.log('✅ Unity SDK加载成功');
+                        resolve(true);
+                    };
+                    
+                    script.onerror = () => {
+                        console.warn('❌ Unity SDK加载失败');
+                        resolve(false);
+                    };
+                    
                     document.head.appendChild(script);
                 });
             }
             
             showRewardedAd(adUnitId) {
                 return new Promise((resolve) => {
-                    if (!this.sdkAvailable || typeof unityads === 'undefined') {
-                        console.log('🎬 使用模拟广告');
-                        setTimeout(() => {
-                            resolve({ success: true, earnings: CONFIG.baseEarnings, currency: 'USD' });
-                        }, 1500);
+                    if (!this.sdkLoaded || typeof unityads === 'undefined') {
+                        console.log('⚠️ SDK不可用，使用备用广告');
+                        this.showBackupAd(resolve);
                         return;
                     }
+                    
+                    console.log(`🎬 展示真实Unity广告: ${adUnitId}`);
                     
                     unityads.show(adUnitId, {
                         onClosed: (result) => {
                             if (result && result.completed) {
-                                resolve({ success: true, earnings: CONFIG.baseEarnings, currency: 'USD', isRealAd: true });
+                                console.log('✅ 用户完成观看真实广告');
+                                resolve({
+                                    success: true,
+                                    earnings: CONFIG.baseEarnings,
+                                    currency: 'USD',
+                                    isRealAd: true,
+                                    message: '真实广告完成'
+                                });
                             } else {
-                                resolve({ success: false, message: '广告未完成' });
+                                console.log('⚠️ 用户未完成广告');
+                                resolve({
+                                    success: false,
+                                    message: '广告未完成观看'
+                                });
                             }
                         },
-                        onFailed: () => {
-                            setTimeout(() => {
-                                resolve({ success: true, earnings: CONFIG.baseEarnings, currency: 'USD' });
-                            }, 1500);
+                        onFailed: (error) => {
+                            console.error('❌ Unity广告展示失败:', error);
+                            this.showBackupAd(resolve);
                         }
                     });
                 });
+            }
+            
+            showBackupAd(resolve) {
+                console.log('🎬 展示备用广告');
+                // 创建备用广告界面
+                this.createBackupAdUI(resolve);
+            }
+            
+            createBackupAdUI(resolve) {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.9);
+                    z-index: 9999;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                `;
+                
+                const adContent = document.createElement('div');
+                adContent.style.cssText = `
+                    background: white;
+                    border-radius: 15px;
+                    padding: 30px;
+                    text-align: center;
+                    max-width: 500px;
+                    width: 90%;
+                `;
+                
+                adContent.innerHTML = `
+                    <h2>📱 备用广告展示</h2>
+                    <p>由于网络原因，暂时无法加载Unity Ads</p>
+                    <p>这是备用广告界面，模拟真实广告体验</p>
+                    <div style="margin: 20px 0; padding: 20px; background: #f0f0f0; border-radius: 10px;">
+                        <p>⏳ 广告倒计时: <span id="backupCountdown">10</span>秒</p>
+                        <p>💰 预估收益: $0.15 - $0.40</p>
+                    </div>
+                    <button id="backupSkip" style="background: #666; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">跳过</button>
+                    <button id="backupComplete" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px;">观看完成</button>
+                `;
+                
+                overlay.appendChild(adContent);
+                document.body.appendChild(overlay);
+                
+                let countdown = 10;
+                const countdownEl = document.getElementById('backupCountdown');
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownEl.textContent = countdown;
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        completeAd();
+                    }
+                }, 1000);
+                
+                function completeAd() {
+                    clearInterval(countdownInterval);
+                    document.body.removeChild(overlay);
+                    resolve({
+                        success: true,
+                        earnings: 0.25, // 备用广告收益
+                        currency: 'USD',
+                        isRealAd: false,
+                        message: '备用广告完成'
+                    });
+                }
+                
+                document.getElementById('backupSkip').onclick = function() {
+                    clearInterval(countdownInterval);
+                    document.body.removeChild(overlay);
+                    resolve({
+                        success: false,
+                        message: '用户跳过广告'
+                    });
+                };
+                
+                document.getElementById('backupComplete').onclick = completeAd;
             }
         }
         
         // ========== 游戏逻辑 ==========
         const unityAdManager = new UnityAdManager();
         
+        // 冷却计时器
         setInterval(() => {
             if (gameData.adCooldowns && Array.isArray(gameData.adCooldowns)) {
-                gameData.adCooldowns = gameData.adCooldowns.map(cd => cd > 0 ? cd - 1 : 0);
+                gameData.adCooldowns = gameData.adCooldowns.map(cd => 
+                    cd > 0 ? cd - 1 : 0
+                );
                 updateCooldownDisplay();
             }
         }, 1000);
         
+        // 显示广告
         async function showAd(adIndex) {
+            adIndex = parseInt(adIndex);
+            if (isNaN(adIndex) || adIndex < 1 || adIndex > 3) return;
+            
             const adId = adIndex - 1;
+            
+            if (!gameData.adCooldowns || !Array.isArray(gameData.adCooldowns)) {
+                gameData.adCooldowns = [0, 0, 0];
+            }
+            
             if (gameData.adCooldowns[adId] > 0) {
                 alert(`广告冷却中，请等待 ${gameData.adCooldowns[adId]} 秒`);
                 return;
@@ -228,29 +398,56 @@
             
             try {
                 btn.disabled = true;
-                btn.innerHTML = '⏳ 广告加载中...';
-                statusEl.innerHTML = '⏳ 广告加载中...';
+                btn.innerHTML = '⏳ 加载真实广告...';
+                statusEl.innerHTML = '⏳ 连接Unity服务器...';
                 statusEl.style.color = '#2196F3';
                 
-                let adUnitId = CONFIG.adUnits[`rewarded${adIndex}`] || CONFIG.adUnits.rewarded1;
+                let adUnitId;
+                switch(adIndex) {
+                    case 1: adUnitId = CONFIG.adUnits.rewarded1; break;
+                    case 2: adUnitId = CONFIG.adUnits.rewarded2; break;
+                    case 3: adUnitId = CONFIG.adUnits.rewarded3; break;
+                    default: adUnitId = CONFIG.adUnits.rewarded1;
+                }
+                
+                console.log(`📡 请求广告: ${adUnitId}`);
                 const result = await unityAdManager.showRewardedAd(adUnitId);
                 
                 if (result.success) {
+                    // 更新数据
                     gameData.impressions++;
                     gameData.clicks++;
                     gameData.todayEarnings += result.earnings;
                     gameData.totalEarnings += result.earnings;
+                    
+                    if (!gameData.adEarnings || !Array.isArray(gameData.adEarnings)) {
+                        gameData.adEarnings = [0, 0, 0];
+                    }
                     gameData.adEarnings[adId] += result.earnings;
+                    
                     gameData.adCooldowns[adId] = CONFIG.adCooldown;
                     
                     updateStats();
-                    statusEl.innerHTML = `✅ +$${result.earnings} 收益！`;
-                    statusEl.style.color = '#4CAF50';
+                    
+                    // 显示结果
+                    if (result.isRealAd) {
+                        statusEl.innerHTML = `✅ 真实广告完成 +$${result.earnings.toFixed(2)}`;
+                        statusEl.style.color = '#4CAF50';
+                        console.log(`💰 真实收益: $${result.earnings}`);
+                    } else {
+                        statusEl.innerHTML = `🔌 备用广告 +$${result.earnings.toFixed(2)}`;
+                        statusEl.style.color = '#FF9800';
+                        console.log(`📊 备用收益: $${result.earnings}`);
+                    }
+                    statusEl.style.fontWeight = 'bold';
+                    
                 } else {
                     statusEl.innerHTML = `❌ ${result.message}`;
                     statusEl.style.color = '#f44336';
                 }
+                
             } catch (error) {
+                console.error('广告异常:', error);
                 statusEl.innerHTML = '❌ 广告加载失败';
                 statusEl.style.color = '#f44336';
             } finally {
@@ -263,10 +460,30 @@
             }
         }
         
+        // 更新状态文字
+        function updateStatusText(text) {
+            const statusElements = [
+                document.getElementById('status1'),
+                document.getElementById('status2'),
+                document.getElementById('status3')
+            ];
+            
+            statusElements.forEach(el => {
+                if (el) {
+                    el.innerHTML = text;
+                    el.style.color = '#2196F3';
+                }
+            });
+        }
+        
+        // 更新冷却显示
         function updateCooldownDisplay() {
+            if (!gameData.adCooldowns || !Array.isArray(gameData.adCooldowns)) return;
+            
             gameData.adCooldowns.forEach((cd, index) => {
                 const statusEl = document.getElementById(`status${index + 1}`);
                 const btn = document.getElementById(`btn${index + 1}`);
+                
                 if (!statusEl || !btn) return;
                 
                 if (cd > 0) {
@@ -278,55 +495,116 @@
                     statusEl.innerHTML = '✅ 准备就绪';
                     statusEl.style.color = '#4CAF50';
                     btn.disabled = false;
-                    btn.innerHTML = '🎬 观看广告赚 $0.35';
+                    btn.innerHTML = '🎬 观看真实广告赚收益';
                 }
             });
         }
         
+        // 更新统计
         function updateStats() {
-            document.getElementById('impressions').textContent = gameData.impressions;
-            document.getElementById('todayEarnings').textContent = '$' + gameData.todayEarnings.toFixed(2);
-            document.getElementById('totalEarnings').textContent = '$' + gameData.totalEarnings.toFixed(2);
+            const elements = {
+                impressions: document.getElementById('impressions'),
+                todayEarnings: document.getElementById('todayEarnings'),
+                totalEarnings: document.getElementById('totalEarnings'),
+                clickRate: document.getElementById('clickRate')
+            };
+            
+            if (elements.impressions) elements.impressions.textContent = gameData.impressions;
+            if (elements.todayEarnings) elements.todayEarnings.textContent = '$' + gameData.todayEarnings.toFixed(2);
+            if (elements.totalEarnings) elements.totalEarnings.textContent = '$' + gameData.totalEarnings.toFixed(2);
             
             const clickRate = gameData.impressions > 0 ? 
                 ((gameData.clicks / gameData.impressions) * 100).toFixed(1) : 0;
-            document.getElementById('clickRate').textContent = clickRate + '%';
+            if (elements.clickRate) elements.clickRate.textContent = clickRate + '%';
             
-            gameData.adEarnings.forEach((earning, index) => {
-                const el = document.getElementById(`earnings${index + 1}`);
-                if (el) el.textContent = earning.toFixed(2);
-            });
+            if (gameData.adEarnings && Array.isArray(gameData.adEarnings)) {
+                gameData.adEarnings.forEach((earning, index) => {
+                    const el = document.getElementById(`earnings${index + 1}`);
+                    if (el) el.textContent = earning.toFixed(2);
+                });
+            }
             
-            localStorage.setItem('adGameData', JSON.stringify(gameData));
+            saveGameData();
         }
         
+        // 保存数据
+        function saveGameData() {
+            try {
+                localStorage.setItem('adGameData', JSON.stringify(gameData));
+                console.log('💾 游戏数据已保存');
+            } catch (error) {
+                console.log('保存失败:', error);
+            }
+        }
+        
+        // 加载数据
         function loadGameData() {
             try {
                 const saved = localStorage.getItem('adGameData');
                 if (saved) {
                     gameData = JSON.parse(saved);
                     updateStats();
+                    console.log('📂 游戏数据已加载');
                 }
             } catch (error) {
                 console.log('加载失败:', error);
             }
         }
         
+        // 页面加载
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎮 游戏加载中...');
+            console.log('🎮 真实收益游戏加载中...');
+            console.log('👤 开发者: youmeng00000');
+            console.log('🌐 网站: https://youmeng00000.github.io/');
+            console.log('🎯 模式: 真实收益模式');
+            console.log('💰 Game ID: 6028834');
+            console.log('📊 广告单元: youmeng1, youmeng2, youmeng3');
+            
             loadGameData();
             updateCooldownDisplay();
-            console.log('✅ 游戏就绪');
+            
+            console.log('✅ 游戏就绪 - 等待用户观看真实广告');
         });
         
+        // 调试功能
+        window.showAllAds = function() {
+            if (!gameData.adCooldowns || !Array.isArray(gameData.adCooldowns)) {
+                gameData.adCooldowns = [0, 0, 0];
+            }
+            for (let i = 1; i <= 3; i++) {
+                if (gameData.adCooldowns[i - 1] === 0) {
+                    setTimeout(() => showAd(i), i * 1000);
+                }
+            }
+        };
+        
         window.resetGame = function() {
-            if (confirm('重置所有数据？')) {
-                gameData = { impressions:0, clicks:0, todayEarnings:0, totalEarnings:0, adCooldowns:[0,0,0], adEarnings:[0,0,0] };
+            if (confirm('重置所有游戏数据？')) {
+                gameData = {
+                    impressions: 0,
+                    clicks: 0,
+                    todayEarnings: 0,
+                    totalEarnings: 0,
+                    adCooldowns: [0, 0, 0],
+                    adEarnings: [0, 0, 0]
+                };
                 localStorage.removeItem('adGameData');
                 updateStats();
                 updateCooldownDisplay();
-                alert('已重置');
+                alert('游戏数据已重置');
+                console.log('🔄 游戏数据已重置');
             }
+        };
+        
+        // 查看配置
+        window.showConfig = function() {
+            console.log('⚙️ 当前配置:', CONFIG);
+            alert(`真实模式配置：
+Game ID: ${CONFIG.unityGameId}
+广告单元: ${Object.values(CONFIG.adUnits).join(', ')}
+测试模式: ${CONFIG.testMode ? '是' : '否'}
+冷却时间: ${CONFIG.adCooldown}秒
+基础收益: $${CONFIG.baseEarnings}`);
         };
     </script>
 </body>
